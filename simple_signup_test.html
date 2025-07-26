@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive - Simple Signup Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .success { color: green; }
+        .error { color: red; }
+        #log { margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>TaskHive - Simple Signup Test</h1>
+    
+    <form id="signup-form">
+        <div class="form-group">
+            <label for="signup-name">Full Name</label>
+            <input type="text" id="signup-name" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-confirm">Confirm Password</label>
+            <input type="password" id="signup-confirm" required>
+        </div>
+        <button type="submit" id="submit-btn">Create Account</button>
+    </form>
+    
+    <div id="log"></div>
+    
+    <script>
+        // Simple logging function
+        function log(message, isError = false) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = isError ? 'red' : 'black';
+            logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        // Simple Auth module
+        const SimpleAuth = {
+            async register(name, email, password) {
+                log(`Attempting to register user: ${name} (${email})`);
+                try {
+                    const response = await fetch('http://localhost:3000/api/users/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    
+                    log(`Registration response status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    log(`Registration response data: ${JSON.stringify(data, null, 2)}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Registration failed');
+                    }
+                    
+                    // Store token and user data
+                    localStorage.setItem('taskhive_token', data.token);
+                    localStorage.setItem('taskhive_user', JSON.stringify(data.user));
+                    log('User data stored in localStorage successfully', false);
+                    
+                    return data;
+                } catch (error) {
+                    log(`Registration error: ${error.message}`, true);
+                    throw error;
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded, setting up form handler');
+            
+            const form = document.getElementById('signup-form');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                log('Form submitted');
+                
+                const name = document.getElementById('signup-name').value.trim();
+                const email = document.getElementById('signup-email').value.trim();
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm').value;
+                
+                // Validation
+                if (!name || !email || !password) {
+                    log('Please fill in all fields', true);
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    log('Passwords do not match', true);
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    log('Password must be at least 6 characters long', true);
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating account...';
+                
+                try {
+                    const result = await SimpleAuth.register(name, email, password);
+                    log(`✅ Registration successful! Welcome ${result.user.name}`, false);
+                    log('Redirecting to dashboard...', false);
+                    
+                    // Simulate redirect
+                    setTimeout(() => {
+                        log('Would redirect to dashboard.html now', false);
+                    }, 1000);
+                    
+                } catch (error) {
+                    log(`❌ Registration failed: ${error.message}`, true);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Account';
+                }
+            });
+            
+            log('Form handler set up successfully');
+        });
+    </script>
+</body>
+</html>

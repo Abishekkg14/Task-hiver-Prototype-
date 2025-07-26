@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive - Completed Tasks</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <img src="https://placehold.co/100x100/orange/white?text=User" alt="User Avatar" id="sidebar-avatar">
+                </div>
+                <h3 id="user-name">User Name</h3>
+                <p>TaskHive Member</p>
+            </div>
+            <div class="sidebar-menu">                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="my-tasks.html"><i class="fas fa-tasks"></i> My Tasks</a></li>
+                    <li><a href="completed-tasks.html" class="active"><i class="fas fa-check-circle"></i> Completed</a></li>
+                    <li><a href="dashboard.html#create-task-modal"><i class="fas fa-plus-circle"></i> Create Task</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="taskhive_links.html"><i class="fas fa-link"></i> All Pages</a></li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h2>Completed Tasks</h2>
+                    <p>All tasks that have been completed or verified</p>
+                </div>
+                <div class="dashboard-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search tasks..." id="task-search">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Grid -->
+            <div class="tasks-container">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Filter by:</label>
+                        <select id="filter-status">
+                            <option value="all">All Completed</option>
+                            <option value="awaiting-verification">Awaiting Verification</option>
+                            <option value="verified">Verified</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Sort by:</label>
+                        <select id="sort-by">
+                            <option value="completed-desc">Completed (Newest)</option>
+                            <option value="completed-asc">Completed (Oldest)</option>
+                            <option value="title-asc">Title (A-Z)</option>
+                            <option value="title-desc">Title (Z-A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Task Grid -->
+                <div id="task-grid" class="task-grid">
+                    <!-- Tasks will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            if (!Auth.isAuthenticated()) {
+                window.location.href = 'welcomepage1.html';
+                return;
+            }
+
+            // Load user data
+            TaskHive.currentUser = Auth.getCurrentUser();
+            updateUserUIElements();
+
+            // Load completed tasks
+            loadCompletedTasks();
+
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        function loadCompletedTasks() {
+            const taskGrid = document.getElementById('task-grid');
+            if (!taskGrid) {
+                console.error("Task grid element not found!");
+                return;
+            }
+
+            // Get the status filter value
+            const statusFilter = document.getElementById('filter-status').value;
+            
+            // For the demo, we'll use localStorage to store tasks
+            const allTasks = JSON.parse(localStorage.getItem('taskhive_tasks') || '[]');
+            
+            // Filter completed tasks (awaiting-verification or verified)
+            let completedTasks = allTasks.filter(task => {
+                if (statusFilter === 'all') {
+                    return ['awaiting-verification', 'verified'].includes(task.status);
+                } else {
+                    return task.status === statusFilter;
+                }
+            });
+
+            // Sort tasks based on selected sort option
+            const sortBy = document.getElementById('sort-by').value;
+            sortTasks(completedTasks, sortBy);
+            
+            // Clear existing content with fade-out effect
+            const existingCards = taskGrid.querySelectorAll('.task-card');
+            if (existingCards.length > 0) {
+                existingCards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                });
+                
+                // Small delay before removing cards to allow animation to complete
+                setTimeout(() => {
+                    taskGrid.innerHTML = '';
+                    displayTasks(completedTasks, taskGrid);
+                }, 300);
+            } else {
+                taskGrid.innerHTML = '';
+                displayTasks(completedTasks, taskGrid);
+            }
+        }
+
+        function sortTasks(tasks, sortOption) {
+            switch(sortOption) {
+                case 'completed-desc':
+                    tasks.sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt));
+                    break;
+                case 'completed-asc':
+                    tasks.sort((a, b) => new Date(a.completedAt || a.createdAt) - new Date(b.completedAt || b.createdAt));
+                    break;
+                case 'title-asc':
+                    tasks.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'title-desc':
+                    tasks.sort((a, b) => b.title.localeCompare(a.title));
+                    break;
+                default:
+                    tasks.sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt));
+            }
+        }
+
+        function displayTasks(tasks, taskGrid) {
+            if (tasks.length === 0) {
+                taskGrid.innerHTML = '<p class="no-tasks-message"><i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 15px; color: #ddd;"></i><br>No completed tasks available.</p>';
+                return;
+            }
+            // Always reload tasks from localStorage for latest ratings
+            const allTasks = JSON.parse(localStorage.getItem('taskhive_tasks') || '[]');
+            tasks.forEach((task, index) => {
+                // Find the latest version of the task by id or _id
+                const latestTask = allTasks.find(t => t.id === task.id || t._id === task.id || t.id === task._id || t._id === task._id) || task;
+                const taskCard = createTaskCard(latestTask.id || latestTask._id, latestTask);
+                taskCard.style.animationDelay = `${0.1 * (index % 10)}s`;
+                taskGrid.appendChild(taskCard);
+            });
+        }
+
+        function createTaskCard(id, task) {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            
+            let statusClass = '';
+            switch(task.status) {
+                case 'awaiting-verification':
+                    statusClass = 'status-awaiting';
+                    break;
+                case 'verified':
+                    statusClass = 'status-verified';
+                    break;
+            }
+            
+            // Get user info from the task
+            const isCreator = TaskHive.currentUser && TaskHive.currentUser.id === task.createdBy;
+            const isCompleter = TaskHive.currentUser && TaskHive.currentUser.id === task.assignedTo;
+            
+            // Get the name of the task creator and task completer
+            let creatorName = 'Unknown User';
+            let completerName = 'Unknown User';
+            
+            // Look up users - in a real app this would be an API call
+            const users = JSON.parse(localStorage.getItem('taskhive_users') || '[]');
+            
+            const creator = users.find(user => user.id === task.createdBy);
+            if (creator) {
+                creatorName = creator.name;
+            }
+            
+            const completer = users.find(user => user.id === task.assignedTo);
+            if (completer) {
+                completerName = completer.name;
+            }
+            
+            card.innerHTML = `
+                <div class="task-status ${statusClass}">${formatStatus(task.status)}</div>
+                <h3 class="task-title">${task.title}</h3>
+                <p class="task-details">${truncateText(task.description, 100)}</p>
+                <div class="task-meta">
+                    ${task.completedAt ? `
+                    <div class="task-completed-date">
+                        <i class="fas fa-clock"></i>
+                        <span>Completed: ${formatDate(task.completedAt)}</span>
+                    </div>` : ''}
+                    <div class="task-type">
+                        <i class="fas ${getTypeIcon(task.type)}"></i>
+                        <span>${formatTaskType(task.type || 'other')}</span>
+                    </div>
+                </div>
+                <div class="task-participants">
+                    <div class="task-creator">
+                        <span class="label">Created by:</span>
+                        <span class="value">${creatorName}</span>
+                    </div>
+                    <div class="task-completer">
+                        <span class="label">Completed by:</span>
+                        <span class="value">${completerName}</span>
+                    </div>
+                </div>
+                ${task.taskRating ? `<div class='task-card-rating'>${generateStarRating(task.taskRating)} <span class='rating-value'>${task.taskRating.toFixed(1)}/5</span></div>` : ''}
+                <div class="task-actions">
+                    <button class="secondary-button view-task-btn" data-id="${id}">View Details</button>
+                </div>
+            `;
+            
+            // Add event listener to view task button
+            card.querySelector('.view-task-btn').addEventListener('click', () => {
+                openTaskDetails(id);
+            });
+            
+            return card;
+        }
+
+        function formatStatus(status) {
+            switch(status) {
+                case 'awaiting-verification': return 'Awaiting Verification';
+                case 'verified': return 'Verified';
+                default: return status;
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function getTypeIcon(type) {
+            switch (type) {
+                case 'delivery': return 'fa-truck';
+                case 'errand': return 'fa-running';
+                case 'assistance': return 'fa-hands-helping';
+                case 'repairs': return 'fa-tools';
+                default: return 'fa-clipboard-list';
+            }
+        }
+
+        function formatTaskType(type) {
+            return type.charAt(0).toUpperCase() + type.slice(1);
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text || text.length <= maxLength) return text;
+            return text.substr(0, maxLength) + '...';
+        }        function openTaskDetails(taskId) {
+            // Get all tasks from localStorage
+            const allTasks = JSON.parse(localStorage.getItem('taskhive_tasks') || '[]');
+            const task = allTasks.find(t => t.id === taskId);
+            
+            if (!task) {
+                console.error("Task not found:", taskId);
+                alert("Task not found!");
+                return;
+            }
+            
+            const currentUser = Auth.getCurrentUser();
+            const isTaskCreator = task.createdBy === currentUser.id;
+            const isTaskCompleter = task.assignedTo === currentUser.id;
+            
+            // Get user info
+            const users = JSON.parse(localStorage.getItem('taskhive_users') || '[]');
+            let creatorName = "Unknown User";
+            let completerName = "Unknown User";
+            
+            const creator = users.find(user => user.id === task.createdBy);
+            if (creator) creatorName = creator.name;
+            
+            const completer = users.find(user => user.id === task.assignedTo);
+            if (completer) completerName = completer.name;
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'modal task-details-modal';
+            modal.style.display = 'flex';
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <div class="modal-task-header">
+                        <h2>${task.title}</h2>
+                        <div class="task-status ${getStatusClass(task.status)}">${formatStatus(task.status)}</div>
+                    </div>
+                    
+                    <div class="modal-task-info">
+                        <div class="task-description">
+                            <p>${task.description}</p>
+                        </div>
+                        
+                        <div class="task-participants-details">
+                            <div class="participant">
+                                <strong>Created by:</strong> ${creatorName}
+                            </div>
+                            <div class="participant">
+                                <strong>Completed by:</strong> ${completerName}
+                            </div>
+                        </div>
+                        
+                        <div class="task-completion-details">
+                            <h3>Completion Details</h3>
+                            <div class="completion-info">
+                                <p><strong>Completed At:</strong> ${formatDate(task.completedAt)}</p>
+                                ${task.verifiedAt ? `<p><strong>Verified At:</strong> ${formatDate(task.verifiedAt)}</p>` : ''}
+                                ${task.completionNote ? `<p><strong>Note:</strong> ${task.completionNote}</p>` : ''}
+                            </div>
+                        </div>
+                        
+                        ${task.location ? `
+                        <div class="task-location">
+                            <h3>Task Location</h3>
+                            <div id="map-${taskId}" class="map-container"></div>
+                            <div class="location-display">
+                                <i class="fas fa-map-marker-alt"></i> ${task.location}
+                            </div>
+                        </div>` : ''}
+                        
+                        <div class="user-rating-section">
+                            <h3>Ratings</h3>
+                            <div class="rating-tabs">
+                                <div class="rating-tab active" data-tab="task-rating">Task Rating</div>
+                                <div class="rating-tab" data-tab="user-rating">User Rating</div>
+                            </div>
+                            
+                            <div class="rating-content active" id="task-rating-content">
+                                ${isTaskCreator && task.status === 'verified' && !task.taskRating ? `
+                                <div class="task-rating">
+                                    <p>How would you rate ${completerName}'s completion of this task?</p>
+                                    <div class="star-rating" data-task-id="${taskId}" data-rating-type="task">
+                                        <i class="far fa-star" data-rating="1"></i>
+                                        <i class="far fa-star" data-rating="2"></i>
+                                        <i class="far fa-star" data-rating="3"></i>
+                                        <i class="far fa-star" data-rating="4"></i>
+                                        <i class="far fa-star" data-rating="5"></i>
+                                    </div>
+                                    <button class="primary-button submit-rating-btn" data-task-id="${taskId}" data-rating-type="task">Submit Task Rating</button>
+                                </div>
+                                ` : ''}
+                                
+                                ${task.taskRating ? `
+                                <div class="rating-display">
+                                    <p>Task completion rating:</p>
+                                    ${generateStarRating(task.taskRating)}
+                                    <span class="rating-value">${task.taskRating.toFixed(1)}/5.0</span>
+                                </div>
+                                ` : task.status === 'verified' && !isTaskCreator ? `
+                                <p>The task creator has not rated this task completion yet.</p>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="rating-content" id="user-rating-content">
+                                ${isTaskCompleter && task.status === 'verified' && !task.userRating ? `
+                                <div class="user-rating">
+                                    <p>How would you rate your experience working with ${creatorName}?</p>
+                                    <div class="star-rating" data-task-id="${taskId}" data-rating-type="user">
+                                        <i class="far fa-star" data-rating="1"></i>
+                                        <i class="far fa-star" data-rating="2"></i>
+                                        <i class="far fa-star" data-rating="3"></i>
+                                        <i class="far fa-star" data-rating="4"></i>
+                                        <i class="far fa-star" data-rating="5"></i>
+                                    </div>
+                                    <button class="primary-button submit-rating-btn" data-task-id="${taskId}" data-rating-type="user">Submit User Rating</button>
+                                </div>
+                                ` : ''}
+                                
+                                ${task.userRating ? `
+                                <div class="rating-display">
+                                    <p>User experience rating:</p>
+                                    ${generateStarRating(task.userRating)}
+                                    <span class="rating-value">${task.userRating.toFixed(1)}/5.0</span>
+                                </div>
+                                ` : task.status === 'verified' && !isTaskCompleter ? `
+                                <p>The task completer has not rated the experience yet.</p>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add close button event listener
+            modal.querySelector('.close-modal').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+            
+            // Add tab switching functionality
+            const tabs = modal.querySelectorAll('.rating-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    modal.querySelectorAll('.rating-tab').forEach(t => t.classList.remove('active'));
+                    modal.querySelectorAll('.rating-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Show corresponding content
+                    const contentId = tab.getAttribute('data-tab') + '-content';
+                    modal.querySelector(`#${contentId}`).classList.add('active');
+                });
+            });
+            
+            // Initialize map if there's a location
+            if (task.location && window.L) {
+                setTimeout(() => {
+                    initializeMap(`map-${taskId}`, task.location);
+                }, 300);
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'awaiting-verification': return 'status-awaiting';
+                case 'verified': return 'status-verified';
+                default: return '';
+            }
+        }
+
+        function initializeMap(mapElementId, location) {
+            const map = L.map(mapElementId).setView([0, 0], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Simple geocoding function (in production, use a proper geocoding service)
+            geocodeLocation(location).then(coords => {
+                if (coords) {
+                    map.setView([coords.lat, coords.lon], 16);
+                    L.marker([coords.lat, coords.lon]).addTo(map)
+                        .bindPopup(`<b>Task Location</b><br>${location}`).openPopup();
+                } else {
+                    map.setView([0, 0], 2);
+                    document.getElementById(mapElementId).innerHTML = 
+                        `<div style="padding: 20px; text-align: center;">
+                            <p>Couldn't map the location: ${location}</p>
+                            <p>Please provide a more specific address</p>
+                        </div>`;
+                }
+            });
+        }
+
+        function geocodeLocation(location) {
+            const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(location)}`;
+            
+            return fetch(nominatimUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        return {
+                            lat: parseFloat(data[0].lat),
+                            lon: parseFloat(data[0].lon)
+                        };
+                    }
+                    return null;
+                })
+                .catch(error => {
+                    console.error("Error geocoding location:", error);
+                    return null;
+                });
+        }        function setupEventListeners() {
+            // Status Filter Change
+            document.getElementById('filter-status').addEventListener('change', loadCompletedTasks);
+            
+            // Sort Options Change
+            document.getElementById('sort-by').addEventListener('change', loadCompletedTasks);
+            
+            // Search Input
+            const searchInput = document.getElementById('task-search');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                const taskCards = document.querySelectorAll('.task-card');
+                
+                taskCards.forEach(card => {
+                    const title = card.querySelector('.task-title').textContent.toLowerCase();
+                    const description = card.querySelector('.task-details').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            // Mobile Menu Toggle
+            document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('active');
+                
+                const icon = this.querySelector('i');
+                if (sidebar.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            // Logout Button
+            document.getElementById('logout-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                Auth.logout();
+                window.location.href = 'welcomepage1.html';
+            });
+            
+            // Event delegation for star rating interactions
+            document.addEventListener('click', function(e) {
+                // Handle star hover and click
+                if (e.target.matches('.star-rating .fa-star, .star-rating .far, .star-rating .fas')) {
+                    const rating = parseInt(e.target.getAttribute('data-rating'));
+                    const ratingContainer = e.target.closest('.star-rating');
+                    highlightStars(ratingContainer, rating);
+                    ratingContainer.setAttribute('data-selected-rating', rating);
+                }
+                  // Handle rating submission
+                if (e.target.matches('.submit-rating-btn')) {
+                    const taskId = e.target.getAttribute('data-task-id');
+                    const ratingType = e.target.getAttribute('data-rating-type') || 'task';
+                    const ratingContainer = document.querySelector(`.star-rating[data-task-id="${taskId}"][data-rating-type="${ratingType}"]`);
+                    const rating = parseInt(ratingContainer.getAttribute('data-selected-rating') || '0');
+                    
+                    if (rating > 0) {
+                        submitTaskRating(taskId, rating, ratingType);
+                    } else {
+                        alert('Please select a rating before submitting.');
+                    }
+                }
+            });
+        }
+        
+        // Function to highlight stars based on rating
+        function highlightStars(container, rating) {
+            const stars = container.querySelectorAll('i');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.className = 'fas fa-star';
+                    star.style.color = '#F9A826'; // Gold color for selected stars
+                } else {
+                    star.className = 'far fa-star';
+                    star.style.color = ''; // Reset to default color
+                }
+            });
+        }
+          // Function to submit a task or user rating
+        function submitTaskRating(taskId, rating, ratingType = 'task') {
+            // Get tasks from localStorage
+            const allTasks = JSON.parse(localStorage.getItem('taskhive_tasks') || '[]');
+            const taskIndex = allTasks.findIndex(t => t.id === taskId);
+            
+            if (taskIndex === -1) {
+                alert('Error: Task not found!');
+                return;
+            }
+            
+            // Get current user
+            const currentUser = Auth.getCurrentUser();
+            
+            // Update task with rating based on type
+            if (ratingType === 'task') {
+                allTasks[taskIndex].taskRating = rating;
+                
+                // Add rating to task completer's profile
+                const completerId = allTasks[taskIndex].assignedTo;
+                addRatingToUserProfile(completerId, rating, 'asCompleter');
+                
+                // Show confirmation
+                alert(`Thank you! You rated the task completion ${rating}/5 stars.`);
+            } else {
+                allTasks[taskIndex].userRating = rating;
+                
+                // Add rating to task creator's profile
+                const creatorId = allTasks[taskIndex].createdBy;
+                addRatingToUserProfile(creatorId, rating, 'asCreator');
+                
+                // Show confirmation
+                alert(`Thank you! You rated your experience with the task creator ${rating}/5 stars.`);
+            }
+            
+            // Save back to localStorage
+            localStorage.setItem('taskhive_tasks', JSON.stringify(allTasks));
+            
+            // Close modal
+            document.querySelector('.task-details-modal .close-modal').click();
+            
+            // Reload tasks to update UI
+            loadCompletedTasks();
+        }
+        
+        // Function to add rating to a user's profile
+        function addRatingToUserProfile(userId, rating, ratingType) {
+            // Get users from localStorage
+            const users = JSON.parse(localStorage.getItem('taskhive_users') || '[]');
+            const userIndex = users.findIndex(u => u.id === userId);
+            
+            if (userIndex === -1) {
+                console.error('User not found:', userId);
+                return;
+            }
+            
+            // Initialize ratings object if it doesn't exist
+            if (!users[userIndex].ratings) {
+                users[userIndex].ratings = {
+                    asCreator: [],
+                    asCompleter: []
+                };
+            }
+            
+            // Add rating to the appropriate category
+            users[userIndex].ratings[ratingType].push(rating);
+            
+            // Save back to localStorage
+            localStorage.setItem('taskhive_users', JSON.stringify(users));
+            
+            console.log(`Added ${rating}-star rating to user ${userId} as ${ratingType}`);
+        }
+        
+        // Function to generate HTML for star rating display
+        function generateStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = (rating - fullStars) >= 0.5;
+            let html = '';
+            
+            for (let i = 1; i <= 5; i++) {
+                if (i <= fullStars) {
+                    html += '<i class="fas fa-star" style="color: #F9A826;"></i>';
+                } else if (i === fullStars + 1 && hasHalfStar) {
+                    html += '<i class="fas fa-star-half-alt" style="color: #F9A826;"></i>';
+                } else {
+                    html += '<i class="far fa-star" style="color: #ccc;"></i>';
+                }
+            }
+            
+            return html;
+        }
+    </script>
+</body>
+</html>

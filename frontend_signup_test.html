@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive - Frontend Signup Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="landing-container">
+        <h1>TaskHive - Frontend Signup Test</h1>
+        <p>This page tests the complete frontend signup flow using the actual modals and forms.</p>
+        
+        <button class="primary-button" onclick="openSignupModal()">Test Signup</button>
+        <button class="secondary-button" onclick="openLoginModal()">Test Login</button>
+        
+        <div id="status-log" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px; max-height: 200px; overflow-y: auto;">
+            <h3>Status Log:</h3>
+        </div>
+    </div>
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Login to TaskHive</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="primary-button">Login</button>
+            </form>
+            <p class="form-footer">Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Join TaskHive</h2>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm">Confirm Password</label>
+                    <input type="password" id="signup-confirm" required>
+                </div>
+                <button type="submit" class="primary-button">Create Account</button>
+            </form>
+            <p class="form-footer">Already have an account? <a href="#" id="show-login">Login</a></p>
+        </div>
+    </div>
+    
+    <script src="auth.js"></script>
+    <script src="app_fixed.js"></script>
+    <script>
+        // Status logging
+        function logStatus(message, isError = false) {
+            const statusLog = document.getElementById('status-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = isError ? 'red' : 'green';
+            statusLog.innerHTML += `<div style="color: ${color}; margin: 2px 0;">[${timestamp}] ${message}</div>`;
+            statusLog.scrollTop = statusLog.scrollHeight;
+            console.log(message);
+        }
+        
+        // Modal functions
+        function openSignupModal() {
+            logStatus('Opening signup modal...');
+            document.getElementById('signup-modal').style.display = 'flex';
+        }
+        
+        function openLoginModal() {
+            logStatus('Opening login modal...');
+            document.getElementById('login-modal').style.display = 'flex';
+        }
+        
+        // Close modal functionality
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('close-modal')) {
+                e.target.closest('.modal').style.display = 'none';
+                logStatus('Modal closed');
+            }
+        });
+        
+        // Check when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            logStatus('Page loaded successfully');
+            logStatus(`Auth module available: ${typeof Auth !== 'undefined'}`);
+            logStatus(`TaskHive object available: ${typeof TaskHive !== 'undefined'}`);
+            
+            // Check if forms are found
+            const signupForm = document.getElementById('signup-form');
+            const loginForm = document.getElementById('login-form');
+            logStatus(`Signup form found: ${signupForm !== null}`);
+            logStatus(`Login form found: ${loginForm !== null}`);
+            
+            // Override the redirect to just log success
+            const originalLocation = window.location;
+            Object.defineProperty(window, 'location', {
+                value: {
+                    ...originalLocation,
+                    href: originalLocation.href,
+                    set href(value) {
+                        logStatus(`SUCCESS: Would redirect to ${value}`, false);
+                        logStatus('✅ Signup/Login flow completed successfully!', false);
+                    }
+                },
+                writable: true
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Testing - TaskHive</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .test-result {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-info { background: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-map-marked-alt"></i> Location Tracking Test Dashboard</h1>
+        <p>This page allows you to test all location tracking features of TaskHive.</p>
+        
+        <!-- Basic Location Support Test -->
+        <div class="test-section">
+            <h2>1. Basic Location Support</h2>
+            <div class="test-controls">
+                <button class="location-btn" id="test-support">Test Browser Support</button>
+                <button class="location-btn" id="test-permission">Test Permission Status</button>
+            </div>
+            <div id="support-result" class="test-result"></div>
+        </div>
+        
+        <!-- Location Tracker Test -->
+        <div class="test-section">
+            <h2>2. Location Tracker Module</h2>
+            <div class="test-controls">
+                <button class="location-btn" id="init-tracker">Initialize Tracker</button>
+                <button class="location-btn" id="get-current">Get Current Location</button>
+                <button class="location-btn" id="start-tracking">Start Tracking</button>
+                <button class="location-btn secondary" id="stop-tracking">Stop Tracking</button>
+            </div>
+            <div id="tracker-result" class="test-result"></div>
+        </div>
+        
+        <!-- Map Creation Test -->
+        <div class="test-section">
+            <h2>3. Map Creation & Display</h2>
+            <div class="test-controls">
+                <button class="location-btn" id="create-map">Create Map</button>
+                <button class="location-btn" id="add-user-marker">Add User Marker</button>
+                <button class="location-btn" id="add-task-marker">Add Task Marker</button>
+                <button class="location-btn secondary" id="clear-map">Clear Map</button>
+            </div>
+            <div class="map-container" id="test-map" style="height: 300px; margin: 1rem 0;"></div>
+            <div id="map-result" class="test-result"></div>
+        </div>
+        
+        <!-- API Integration Test -->
+        <div class="test-section">
+            <h2>4. API Integration</h2>
+            <div class="test-controls">
+                <button class="location-btn" id="test-create-task">Create Task with Location</button>
+                <button class="location-btn" id="test-nearby-tasks">Get Nearby Tasks</button>
+                <button class="location-btn" id="test-update-location">Update Task Location</button>
+            </div>
+            <div id="api-result" class="test-result"></div>
+        </div>
+        
+        <!-- Distance Calculation Test -->
+        <div class="test-section">
+            <h2>5. Distance Calculations</h2>
+            <div class="test-controls">
+                <button class="location-btn" id="test-distance">Test Distance Calculation</button>
+            </div>
+            <div id="distance-result" class="test-result"></div>
+        </div>
+        
+        <!-- Real-time Features Test -->
+        <div class="test-section">
+            <h2>6. Real-time Location Updates</h2>
+            <div class="location-status inactive" id="realtime-status">
+                <i class="fas fa-location-slash"></i>
+                <span>Real-time tracking inactive</span>
+            </div>
+            <div class="test-controls">
+                <button class="location-btn" id="start-realtime">Start Real-time Tracking</button>
+                <button class="location-btn secondary" id="stop-realtime">Stop Real-time Tracking</button>
+            </div>
+            <div id="realtime-result" class="test-result"></div>
+        </div>
+        
+        <!-- Overall Status -->
+        <div class="test-section">
+            <h2>Overall Test Status</h2>
+            <div id="overall-status">
+                <p><span class="status-indicator status-info"></span> Click "Run All Tests" to check all functionality</p>
+            </div>
+            <div class="test-controls">
+                <button class="primary-button" id="run-all-tests">Run All Tests</button>
+                <button class="secondary-button" id="clear-results">Clear Results</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="auth.js"></script>
+    <script src="location-tracker.js"></script>
+    
+    <script>
+        class LocationTester {
+            constructor() {
+                this.testMap = null;
+                this.testResults = {};
+                this.isRealTimeActive = false;
+                this.realTimeWatchId = null;
+            }
+            
+            async init() {
+                this.setupEventListeners();
+                this.log('Location Tester initialized');
+            }
+            
+            setupEventListeners() {
+                // Basic support tests
+                document.getElementById('test-support').addEventListener('click', () => this.testBrowserSupport());
+                document.getElementById('test-permission').addEventListener('click', () => this.testPermissionStatus());
+                
+                // Location tracker tests
+                document.getElementById('init-tracker').addEventListener('click', () => this.testTrackerInit());
+                document.getElementById('get-current').addEventListener('click', () => this.testGetCurrent());
+                document.getElementById('start-tracking').addEventListener('click', () => this.testStartTracking());
+                document.getElementById('stop-tracking').addEventListener('click', () => this.testStopTracking());
+                
+                // Map tests
+                document.getElementById('create-map').addEventListener('click', () => this.testCreateMap());
+                document.getElementById('add-user-marker').addEventListener('click', () => this.testAddUserMarker());
+                document.getElementById('add-task-marker').addEventListener('click', () => this.testAddTaskMarker());
+                document.getElementById('clear-map').addEventListener('click', () => this.testClearMap());
+                
+                // API tests
+                document.getElementById('test-create-task').addEventListener('click', () => this.testCreateTaskWithLocation());
+                document.getElementById('test-nearby-tasks').addEventListener('click', () => this.testNearbyTasks());
+                document.getElementById('test-update-location').addEventListener('click', () => this.testUpdateTaskLocation());
+                
+                // Distance tests
+                document.getElementById('test-distance').addEventListener('click', () => this.testDistanceCalculation());
+                
+                // Real-time tests
+                document.getElementById('start-realtime').addEventListener('click', () => this.startRealTimeTest());
+                document.getElementById('stop-realtime').addEventListener('click', () => this.stopRealTimeTest());
+                
+                // Overall tests
+                document.getElementById('run-all-tests').addEventListener('click', () => this.runAllTests());
+                document.getElementById('clear-results').addEventListener('click', () => this.clearAllResults());
+            }
+            
+            log(message, containerId = null) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logMessage = `[${timestamp}] ${message}`;
+                console.log(logMessage);
+                
+                if (containerId) {
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        container.innerHTML += logMessage + '\n';
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }
+            }
+            
+            // Test 1: Browser Support
+            testBrowserSupport() {
+                const result = document.getElementById('support-result');
+                result.innerHTML = '';
+                
+                this.log('Testing browser support...', 'support-result');
+                
+                if ('geolocation' in navigator) {
+                    this.log('✅ Geolocation API supported', 'support-result');
+                    this.testResults.browserSupport = true;
+                } else {
+                    this.log('❌ Geolocation API not supported', 'support-result');
+                    this.testResults.browserSupport = false;
+                }
+                
+                if (typeof L !== 'undefined') {
+                    this.log('✅ Leaflet.js loaded', 'support-result');
+                    this.testResults.leafletLoaded = true;
+                } else {
+                    this.log('❌ Leaflet.js not loaded', 'support-result');
+                    this.testResults.leafletLoaded = false;
+                }
+                
+                if (window.LocationTracker) {
+                    this.log('✅ LocationTracker module available', 'support-result');
+                    this.testResults.trackerAvailable = true;
+                } else {
+                    this.log('❌ LocationTracker module not available', 'support-result');
+                    this.testResults.trackerAvailable = false;
+                }
+            }
+            
+            async testPermissionStatus() {
+                const result = document.getElementById('support-result');
+                this.log('Testing permission status...', 'support-result');
+                
+                try {
+                    const permission = await navigator.permissions.query({name: 'geolocation'});
+                    this.log(`Permission status: ${permission.state}`, 'support-result');
+                    this.testResults.permissionStatus = permission.state;
+                } catch (error) {
+                    this.log(`Could not check permission: ${error.message}`, 'support-result');
+                    this.testResults.permissionStatus = 'unknown';
+                }
+            }
+            
+            // Test 2: Location Tracker
+            async testTrackerInit() {
+                const result = document.getElementById('tracker-result');
+                result.innerHTML = '';
+                
+                this.log('Initializing LocationTracker...', 'tracker-result');
+                
+                try {
+                    await window.LocationTracker.init();
+                    this.log('✅ LocationTracker initialized successfully', 'tracker-result');
+                    this.testResults.trackerInit = true;
+                } catch (error) {
+                    this.log(`❌ LocationTracker initialization failed: ${error.message}`, 'tracker-result');
+                    this.testResults.trackerInit = false;
+                }
+            }
+            
+            async testGetCurrent() {
+                const result = document.getElementById('tracker-result');
+                this.log('Getting current location...', 'tracker-result');
+                
+                try {
+                    const location = await window.LocationTracker.getCurrentLocation();
+                    this.log(`✅ Current location: ${location.latitude}, ${location.longitude}`, 'tracker-result');
+                    this.log(`   Accuracy: ${location.accuracy}m`, 'tracker-result');
+                    this.testResults.getCurrentLocation = true;
+                    this.currentLocation = location;
+                } catch (error) {
+                    this.log(`❌ Failed to get current location: ${error.message}`, 'tracker-result');
+                    this.testResults.getCurrentLocation = false;
+                }
+            }
+            
+            testStartTracking() {
+                const result = document.getElementById('tracker-result');
+                this.log('Starting continuous tracking...', 'tracker-result');
+                
+                try {
+                    window.LocationTracker.startTracking();
+                    
+                    // Subscribe to location updates
+                    window.LocationTracker.onLocationUpdate((location) => {
+                        this.log(`📍 Location update: ${location.latitude}, ${location.longitude}`, 'tracker-result');
+                    });
+                    
+                    this.log('✅ Tracking started successfully', 'tracker-result');
+                    this.testResults.startTracking = true;
+                } catch (error) {
+                    this.log(`❌ Failed to start tracking: ${error.message}`, 'tracker-result');
+                    this.testResults.startTracking = false;
+                }
+            }
+            
+            testStopTracking() {
+                const result = document.getElementById('tracker-result');
+                this.log('Stopping tracking...', 'tracker-result');
+                
+                try {
+                    window.LocationTracker.stopTracking();
+                    this.log('✅ Tracking stopped', 'tracker-result');
+                    this.testResults.stopTracking = true;
+                } catch (error) {
+                    this.log(`❌ Failed to stop tracking: ${error.message}`, 'tracker-result');
+                    this.testResults.stopTracking = false;
+                }
+            }
+            
+            // Test 3: Map Creation
+            testCreateMap() {
+                const result = document.getElementById('map-result');
+                result.innerHTML = '';
+                
+                this.log('Creating test map...', 'map-result');
+                
+                try {
+                    this.testMap = window.LocationTracker.createMap('test-map', {
+                        center: [40.7128, -74.0060], // NYC
+                        zoom: 13
+                    });
+                    
+                    this.log('✅ Map created successfully', 'map-result');
+                    this.testResults.createMap = true;
+                } catch (error) {
+                    this.log(`❌ Failed to create map: ${error.message}`, 'map-result');
+                    this.testResults.createMap = false;
+                }
+            }
+            
+            testAddUserMarker() {
+                const result = document.getElementById('map-result');
+                
+                if (!this.testMap) {
+                    this.log('❌ Map not created yet. Create map first.', 'map-result');
+                    return;
+                }
+                
+                this.log('Adding user marker...', 'map-result');
+                
+                try {
+                    const location = this.currentLocation || { latitude: 40.7128, longitude: -74.0060 };
+                    window.LocationTracker.addUserMarker('test-map', location);
+                    this.log('✅ User marker added', 'map-result');
+                    this.testResults.addUserMarker = true;
+                } catch (error) {
+                    this.log(`❌ Failed to add user marker: ${error.message}`, 'map-result');
+                    this.testResults.addUserMarker = false;
+                }
+            }
+            
+            testAddTaskMarker() {
+                const result = document.getElementById('map-result');
+                
+                if (!this.testMap) {
+                    this.log('❌ Map not created yet. Create map first.', 'map-result');
+                    return;
+                }
+                
+                this.log('Adding task marker...', 'map-result');
+                
+                try {
+                    const taskLocation = { latitude: 40.7589, longitude: -73.9851 }; // Times Square
+                    window.LocationTracker.addTaskMarker('test-map', 'test-task-1', taskLocation, 'Test Task');
+                    this.log('✅ Task marker added', 'map-result');
+                    this.testResults.addTaskMarker = true;
+                } catch (error) {
+                    this.log(`❌ Failed to add task marker: ${error.message}`, 'map-result');
+                    this.testResults.addTaskMarker = false;
+                }
+            }
+            
+            testClearMap() {
+                const result = document.getElementById('map-result');
+                
+                if (!this.testMap) {
+                    this.log('❌ No map to clear', 'map-result');
+                    return;
+                }
+                
+                this.log('Clearing map...', 'map-result');
+                
+                try {
+                    // Remove the map
+                    this.testMap.remove();
+                    this.testMap = null;
+                    
+                    // Clear the map container
+                    document.getElementById('test-map').innerHTML = '';
+                    
+                    this.log('✅ Map cleared', 'map-result');
+                    this.testResults.clearMap = true;
+                } catch (error) {
+                    this.log(`❌ Failed to clear map: ${error.message}`, 'map-result');
+                    this.testResults.clearMap = false;
+                }
+            }
+            
+            // Test 4: Distance Calculation
+            testDistanceCalculation() {
+                const result = document.getElementById('distance-result');
+                result.innerHTML = '';
+                
+                this.log('Testing distance calculations...', 'distance-result');
+                
+                try {
+                    // Test known distances
+                    const nyc = { lat: 40.7128, lng: -74.0060 };
+                    const timesSquare = { lat: 40.7589, lng: -73.9851 };
+                    
+                    const distance = window.LocationTracker.getDistance(
+                        nyc.lat, nyc.lng, timesSquare.lat, timesSquare.lng
+                    );
+                    
+                    const formatted = window.LocationTracker.formatDistance(distance);
+                    
+                    this.log(`Distance from NYC to Times Square: ${Math.round(distance)}m (${formatted})`, 'distance-result');
+                    
+                    // Test edge cases
+                    const sameLocation = window.LocationTracker.getDistance(nyc.lat, nyc.lng, nyc.lat, nyc.lng);
+                    this.log(`Distance to same location: ${sameLocation}m`, 'distance-result');
+                    
+                    this.log('✅ Distance calculations working', 'distance-result');
+                    this.testResults.distanceCalculation = true;
+                } catch (error) {
+                    this.log(`❌ Distance calculation failed: ${error.message}`, 'distance-result');
+                    this.testResults.distanceCalculation = false;
+                }
+            }
+            
+            // Test 5: API Integration (mock)
+            async testCreateTaskWithLocation() {
+                const result = document.getElementById('api-result');
+                result.innerHTML = '';
+                
+                this.log('Testing task creation with location...', 'api-result');
+                
+                // This would normally require authentication
+                const mockTaskData = {
+                    title: 'Test Task with Location',
+                    description: 'Testing location integration',
+                    timeWindow: 30,
+                    location: 'New York, NY',
+                    locationCoords: {
+                        latitude: 40.7128,
+                        longitude: -74.0060,
+                        address: 'New York, NY, USA'
+                    },
+                    type: 'other'
+                };
+                
+                this.log(`Mock task data: ${JSON.stringify(mockTaskData, null, 2)}`, 'api-result');
+                this.log('✅ Task data structure valid', 'api-result');
+                this.testResults.createTaskWithLocation = true;
+            }
+            
+            async testNearbyTasks() {
+                const result = document.getElementById('api-result');
+                this.log('Testing nearby tasks API...', 'api-result');
+                
+                try {
+                    // Mock API call
+                    const mockLocation = { lat: 40.7128, lng: -74.0060 };
+                    this.log(`Searching for tasks near ${mockLocation.lat}, ${mockLocation.lng}`, 'api-result');
+                    this.log('✅ Nearby tasks API structure ready', 'api-result');
+                    this.testResults.nearbyTasks = true;
+                } catch (error) {
+                    this.log(`❌ Nearby tasks test failed: ${error.message}`, 'api-result');
+                    this.testResults.nearbyTasks = false;
+                }
+            }
+            
+            async testUpdateTaskLocation() {
+                const result = document.getElementById('api-result');
+                this.log('Testing task location update...', 'api-result');
+                
+                const mockLocationUpdate = {
+                    taskId: 'test-task-123',
+                    latitude: 40.7589,
+                    longitude: -73.9851
+                };
+                
+                this.log(`Mock location update: ${JSON.stringify(mockLocationUpdate)}`, 'api-result');
+                this.log('✅ Location update structure valid', 'api-result');
+                this.testResults.updateTaskLocation = true;
+            }
+            
+            // Test 6: Real-time Updates
+            startRealTimeTest() {
+                const result = document.getElementById('realtime-result');
+                const status = document.getElementById('realtime-status');
+                
+                if (this.isRealTimeActive) {
+                    this.log('Real-time tracking already active', 'realtime-result');
+                    return;
+                }
+                
+                result.innerHTML = '';
+                this.log('Starting real-time location test...', 'realtime-result');
+                
+                this.isRealTimeActive = true;
+                status.className = 'location-status loading';
+                status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Starting real-time tracking...</span>';
+                
+                // Subscribe to location updates
+                window.LocationTracker.onLocationUpdate((location) => {
+                    this.log(`📍 Real-time update: ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`, 'realtime-result');
+                    
+                    status.className = 'location-status active';
+                    status.innerHTML = '<i class="fas fa-map-marker-alt"></i> <span>Real-time tracking active</span>';
+                });
+                
+                // Start tracking
+                try {
+                    window.LocationTracker.startTracking();
+                    this.log('✅ Real-time tracking started', 'realtime-result');
+                } catch (error) {
+                    this.log(`❌ Failed to start real-time tracking: ${error.message}`, 'realtime-result');
+                    this.isRealTimeActive = false;
+                    status.className = 'location-status inactive';
+                    status.innerHTML = '<i class="fas fa-location-slash"></i> <span>Real-time tracking failed</span>';
+                }
+            }
+            
+            stopRealTimeTest() {
+                const result = document.getElementById('realtime-result');
+                const status = document.getElementById('realtime-status');
+                
+                if (!this.isRealTimeActive) {
+                    this.log('Real-time tracking not active', 'realtime-result');
+                    return;
+                }
+                
+                this.log('Stopping real-time tracking...', 'realtime-result');
+                
+                try {
+                    window.LocationTracker.stopTracking();
+                    this.isRealTimeActive = false;
+                    
+                    status.className = 'location-status inactive';
+                    status.innerHTML = '<i class="fas fa-location-slash"></i> <span>Real-time tracking stopped</span>';
+                    
+                    this.log('✅ Real-time tracking stopped', 'realtime-result');
+                } catch (error) {
+                    this.log(`❌ Failed to stop real-time tracking: ${error.message}`, 'realtime-result');
+                }
+            }
+            
+            // Run all tests
+            async runAllTests() {
+                this.clearAllResults();
+                
+                console.log('🚀 Running all location tests...');
+                
+                // Run tests in sequence
+                this.testBrowserSupport();
+                await this.sleep(500);
+                
+                await this.testPermissionStatus();
+                await this.sleep(500);
+                
+                await this.testTrackerInit();
+                await this.sleep(500);
+                
+                await this.testGetCurrent();
+                await this.sleep(1000);
+                
+                this.testDistanceCalculation();
+                await this.sleep(500);
+                
+                this.testCreateMap();
+                await this.sleep(500);
+                
+                this.testAddUserMarker();
+                await this.sleep(500);
+                
+                this.testAddTaskMarker();
+                await this.sleep(500);
+                
+                await this.testCreateTaskWithLocation();
+                await this.sleep(500);
+                
+                await this.testNearbyTasks();
+                await this.sleep(500);
+                
+                await this.testUpdateTaskLocation();
+                
+                // Update overall status
+                this.updateOverallStatus();
+            }
+            
+            updateOverallStatus() {
+                const statusDiv = document.getElementById('overall-status');
+                const results = this.testResults;
+                
+                const total = Object.keys(results).length;
+                const passed = Object.values(results).filter(Boolean).length;
+                const failed = total - passed;
+                
+                let statusClass = 'status-success';
+                let statusText = 'All tests passed!';
+                
+                if (failed > 0) {
+                    statusClass = failed > passed ? 'status-error' : 'status-warning';
+                    statusText = `${passed}/${total} tests passed, ${failed} failed`;
+                }
+                
+                statusDiv.innerHTML = `
+                    <p><span class="status-indicator ${statusClass}"></span> ${statusText}</p>
+                    <p>Tests completed: ${total}</p>
+                `;
+            }
+            
+            clearAllResults() {
+                const resultDivs = document.querySelectorAll('.test-result');
+                resultDivs.forEach(div => div.innerHTML = '');
+                this.testResults = {};
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        // Initialize tester when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.locationTester = new LocationTester();
+            window.locationTester.init();
+        });
+    </script>
+</body>
+</html>

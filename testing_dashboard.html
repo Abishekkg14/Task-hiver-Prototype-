@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive - Interactive Testing Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); 
+            color: white; 
+            text-align: center; 
+            padding: 30px; 
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .content { padding: 30px; }
+        .test-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px; 
+        }
+        .test-card { 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            padding: 25px; 
+            border-left: 5px solid #007bff; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .test-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        }
+        .test-card h3 { 
+            color: #007bff; 
+            margin-bottom: 15px; 
+            font-size: 1.4em; 
+        }
+        .test-card p { 
+            margin-bottom: 15px; 
+            color: #666; 
+        }
+        .test-buttons { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 500; 
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .status-section { 
+            background: #e9ecef; 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-bottom: 30px; 
+        }
+        .status-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+        }
+        .status-item { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            text-align: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-indicator { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            margin: 0 auto 15px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+            color: white; 
+        }
+        .status-good { background: #28a745; }
+        .status-warning { background: #ffc107; }
+        .status-error { background: #dc3545; }
+        .status-unknown { background: #6c757d; }
+        .checklist { 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            padding: 25px; 
+        }
+        .checklist-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 10px 0; 
+            border-bottom: 1px solid #dee2e6; 
+        }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-item input[type="checkbox"] { 
+            margin-right: 15px; 
+            transform: scale(1.2); 
+        }
+        .checklist-item label { 
+            flex: 1; 
+            cursor: pointer; 
+        }
+        .progress-bar { 
+            width: 100%; 
+            height: 20px; 
+            background: #e9ecef; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 20px 0; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #28a745, #20c997); 
+            width: 0%; 
+            transition: width 0.3s ease; 
+        }
+        .commands { 
+            background: #343a40; 
+            color: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            font-family: 'Courier New', monospace; 
+            margin: 20px 0; 
+        }
+        .command-line { 
+            background: #495057; 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin: 5px 0; 
+            border-left: 3px solid #007bff; 
+        }
+        @media (max-width: 768px) {
+            .test-grid { grid-template-columns: 1fr; }
+            .test-buttons { justify-content: center; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 TaskHive Testing Dashboard</h1>
+            <p>Interactive testing interface for the TaskHive application</p>
+        </div>
+        
+        <div class="content">
+            <!-- System Status Section -->
+            <div class="status-section">
+                <h2>🔧 System Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-indicator status-unknown" id="backend-indicator">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <h4>Backend Server</h4>
+                        <p id="backend-status">Checking...</p>
+                        <button class="btn btn-info" onclick="checkBackend()">🔄 Test</button>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-indicator status-unknown" id="database-indicator">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h4>MongoDB</h4>
+                        <p id="database-status">Checking...</p>
+                        <button class="btn btn-info" onclick="checkDatabase()">🔄 Test</button>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-indicator status-unknown" id="frontend-indicator">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h4>Frontend Server</h4>
+                        <p id="frontend-status">Port 8080</p>
+                        <button class="btn btn-info" onclick="checkFrontend()">🔄 Test</button>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-indicator status-unknown" id="tasks-indicator">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h4>Tasks API</h4>
+                        <p id="tasks-status">Checking...</p>
+                        <button class="btn btn-info" onclick="checkTasks()">🔄 Test</button>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="runAllSystemTests()" style="font-size: 16px; padding: 15px 30px;">
+                        🚀 Run All System Tests
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Test Categories -->
+            <div class="test-grid">
+                <!-- Authentication Testing -->
+                <div class="test-card">
+                    <h3>🔐 Authentication Testing</h3>
+                    <p>Test user registration, login, and session management</p>
+                    <div class="test-buttons">
+                        <a href="welcomepage1.html" target="_blank" class="btn btn-primary">
+                            🏠 Welcome Page
+                        </a>
+                        <a href="signup_fixed_demo.html" target="_blank" class="btn btn-success">
+                            📋 Signup Demo
+                        </a>
+                        <button class="btn btn-info" onclick="testAuth()">
+                            🧪 Auto Test
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Testing -->
+                <div class="test-card">
+                    <h3>📊 Dashboard Testing</h3>
+                    <p>Test task loading, filtering, and dashboard functionality</p>
+                    <div class="test-buttons">
+                        <a href="dashboard.html" target="_blank" class="btn btn-primary">
+                            📊 Dashboard
+                        </a>
+                        <a href="frontend_signup_test.html" target="_blank" class="btn btn-success">
+                            🧪 Frontend Test
+                        </a>
+                        <button class="btn btn-warning" onclick="createSampleTasks()">
+                            📝 Create Samples
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Task Management -->
+                <div class="test-card">
+                    <h3>✅ Task Management</h3>
+                    <p>Test creating, viewing, accepting, and managing tasks</p>
+                    <div class="test-buttons">
+                        <button class="btn btn-primary" onclick="openDashboard()">
+                            ➕ Create Task
+                        </button>
+                        <button class="btn btn-success" onclick="testTaskFiltering()">
+                            🔍 Test Filtering
+                        </button>
+                        <button class="btn btn-info" onclick="viewSampleTasks()">
+                            👀 View Tasks
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- API Testing -->
+                <div class="test-card">
+                    <h3>🔌 API Testing</h3>
+                    <p>Test backend API endpoints and data flow</p>
+                    <div class="test-buttons">
+                        <button class="btn btn-primary" onclick="testAllAPIs()">
+                            🧪 Test All APIs
+                        </button>
+                        <button class="btn btn-info" onclick="showAPIEndpoints()">
+                            📋 View Endpoints
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearTestData()">
+                            🗑️ Clear Test Data
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mobile Testing -->
+                <div class="test-card">
+                    <h3>📱 Mobile Testing</h3>
+                    <p>Test responsive design and mobile functionality</p>
+                    <div class="test-buttons">
+                        <button class="btn btn-primary" onclick="testMobile()">
+                            📱 Mobile View
+                        </button>
+                        <button class="btn btn-success" onclick="testTouch()">
+                            👆 Touch Events
+                        </button>
+                        <button class="btn btn-info" onclick="testResponsive()">
+                            📐 Responsive Test
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Performance Testing -->
+                <div class="test-card">
+                    <h3>⚡ Performance Testing</h3>
+                    <p>Test loading times, API response, and user experience</p>
+                    <div class="test-buttons">
+                        <button class="btn btn-primary" onclick="testPerformance()">
+                            ⏱️ Load Times
+                        </button>
+                        <button class="btn btn-warning" onclick="stressTest()">
+                            🔥 Stress Test
+                        </button>
+                        <button class="btn btn-info" onclick="measureMetrics()">
+                            📊 Metrics
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Testing Checklist -->
+            <div class="checklist">
+                <h2>📋 Testing Checklist</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p style="text-align: center; margin-bottom: 20px;">
+                    <span id="progress-text">0% Complete</span>
+                </p>
+                
+                <div id="test-checklist">
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check1" onchange="updateProgress()">
+                        <label for="check1">✅ Backend server running on port 3000</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check2" onchange="updateProgress()">
+                        <label for="check2">✅ Frontend server running on port 8080</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check3" onchange="updateProgress()">
+                        <label for="check3">✅ MongoDB connected and accessible</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check4" onchange="updateProgress()">
+                        <label for="check4">✅ Sample tasks created in database</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check5" onchange="updateProgress()">
+                        <label for="check5">✅ User registration works</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check6" onchange="updateProgress()">
+                        <label for="check6">✅ User login works</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check7" onchange="updateProgress()">
+                        <label for="check7">✅ Dashboard loads tasks</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check8" onchange="updateProgress()">
+                        <label for="check8">✅ Task filtering works</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check9" onchange="updateProgress()">
+                        <label for="check9">✅ Task creation works</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check10" onchange="updateProgress()">
+                        <label for="check10">✅ Task acceptance works</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check11" onchange="updateProgress()">
+                        <label for="check11">✅ Navigation between pages works</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check12" onchange="updateProgress()">
+                        <label for="check12">✅ Mobile responsive design works</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Commands -->
+            <div class="commands">
+                <h3>💻 Quick Commands</h3>
+                <div class="command-line">
+                    <strong>Start Backend:</strong> node server.js
+                </div>
+                <div class="command-line">
+                    <strong>Start Frontend:</strong> python -m http.server 8080
+                </div>
+                <div class="command-line">
+                    <strong>Start MongoDB:</strong> mongod
+                </div>
+                <div class="command-line">
+                    <strong>Check Processes:</strong> Get-Process | Where-Object {$_.ProcessName -eq "node"}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // System Status Testing
+        async function checkBackend() {
+            const indicator = document.getElementById('backend-indicator');
+            const status = document.getElementById('backend-status');
+            
+            indicator.className = 'status-indicator status-unknown';
+            status.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/status');
+                const data = await response.json();
+                
+                indicator.className = 'status-indicator status-good';
+                status.textContent = 'Running ✅';
+                document.getElementById('check1').checked = true;
+                updateProgress();
+            } catch (error) {
+                indicator.className = 'status-indicator status-error';
+                status.textContent = 'Not Running ❌';
+            }
+        }
+        
+        async function checkDatabase() {
+            const indicator = document.getElementById('database-indicator');
+            const status = document.getElementById('database-status');
+            
+            indicator.className = 'status-indicator status-unknown';
+            status.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/status');
+                const data = await response.json();
+                
+                if (data.connected) {
+                    indicator.className = 'status-indicator status-good';
+                    status.textContent = 'Connected ✅';
+                    document.getElementById('check3').checked = true;
+                    updateProgress();
+                } else {
+                    throw new Error('Not connected');
+                }
+            } catch (error) {
+                indicator.className = 'status-indicator status-error';
+                status.textContent = 'Not Connected ❌';
+            }
+        }
+        
+        async function checkFrontend() {
+            const indicator = document.getElementById('frontend-indicator');
+            const status = document.getElementById('frontend-status');
+            
+            // Since we're on the frontend, it's obviously running
+            indicator.className = 'status-indicator status-good';
+            status.textContent = 'Running ✅';
+            document.getElementById('check2').checked = true;
+            updateProgress();
+        }
+        
+        async function checkTasks() {
+            const indicator = document.getElementById('tasks-indicator');
+            const status = document.getElementById('tasks-status');
+            
+            indicator.className = 'status-indicator status-unknown';
+            status.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/tasks');
+                const tasks = await response.json();
+                
+                indicator.className = 'status-indicator status-good';
+                status.textContent = `${tasks.length} tasks ✅`;
+                if (tasks.length > 0) {
+                    document.getElementById('check4').checked = true;
+                    updateProgress();
+                }
+            } catch (error) {
+                indicator.className = 'status-indicator status-error';
+                status.textContent = 'API Error ❌';
+            }
+        }
+        
+        async function runAllSystemTests() {
+            await checkBackend();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await checkDatabase();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await checkFrontend();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await checkTasks();
+        }
+        
+        // Test Functions
+        function testAuth() {
+            alert('📝 To test authentication:\\n\\n1. Open the Welcome Page\\n2. Click Sign Up\\n3. Fill out the form\\n4. Check if you\'re redirected to dashboard\\n5. Try logging out and logging back in');
+            window.open('welcomepage1.html', '_blank');
+        }
+        
+        function createSampleTasks() {
+            if (confirm('This will create sample tasks in the database. Continue?')) {
+                alert('Run this command in your terminal:\\n\\nnode create_sample_tasks.js');
+            }
+        }
+        
+        function openDashboard() {
+            window.open('dashboard.html', '_blank');
+        }
+        
+        function testTaskFiltering() {
+            alert('🔍 To test task filtering:\\n\\n1. Open the Dashboard\\n2. Use the Status filter dropdown\\n3. Try the Time Window filter\\n4. Use the Search box\\n5. Verify tasks are filtered correctly');
+            window.open('dashboard.html', '_blank');
+        }
+        
+        function viewSampleTasks() {
+            window.open('dashboard.html', '_blank');
+        }
+        
+        async function testAllAPIs() {
+            const endpoints = [
+                '/api/status',
+                '/api/tasks',
+                '/api/users/register',
+                '/api/users/login'
+            ];
+            
+            let results = [];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    if (endpoint.includes('register') || endpoint.includes('login')) {
+                        results.push(`${endpoint}: ⚠️ Requires POST data`);
+                    } else {
+                        const response = await fetch(`http://localhost:3000${endpoint}`);
+                        results.push(`${endpoint}: ${response.ok ? '✅ OK' : '❌ Error'}`);
+                    }
+                } catch (error) {
+                    results.push(`${endpoint}: ❌ Connection Error`);
+                }
+            }
+            
+            alert('API Test Results:\\n\\n' + results.join('\\n'));
+        }
+        
+        function showAPIEndpoints() {
+            const endpoints = `
+📋 TaskHive API Endpoints:
+
+🔐 Authentication:
+• POST /api/users/register
+• POST /api/users/login
+
+📊 Tasks:
+• GET /api/tasks
+• POST /api/tasks
+• GET /api/tasks/:id
+• PUT /api/tasks/:id/accept
+• PUT /api/tasks/:id/complete
+
+🔧 System:
+• GET /api/status
+            `;
+            alert(endpoints);
+        }
+        
+        function clearTestData() {
+            if (confirm('This will clear test data from the database. Continue?')) {
+                alert('Run this command in your terminal:\\n\\nnode cleanup_test_users.js');
+            }
+        }
+        
+        function testMobile() {
+            alert('📱 To test mobile view:\\n\\n1. Resize your browser window to < 768px width\\n2. Or use browser dev tools (F12) and toggle device mode\\n3. Check if hamburger menu appears\\n4. Test touch interactions');
+        }
+        
+        function testTouch() {
+            alert('👆 Touch testing:\\n\\n1. Use browser dev tools to simulate touch\\n2. Test scrolling and tapping\\n3. Check button sizes are touch-friendly\\n4. Verify modal interactions work');
+        }
+        
+        function testResponsive() {
+            alert('📐 Responsive testing:\\n\\n1. Test at different screen sizes\\n2. Check tablet view (768px - 1024px)\\n3. Check mobile view (< 768px)\\n4. Verify content adapts properly');
+        }
+        
+        function testPerformance() {
+            alert('⚡ Performance testing:\\n\\n1. Open browser DevTools (F12)\\n2. Go to Network tab\\n3. Load the dashboard\\n4. Check load times and resource sizes\\n5. Use Lighthouse for full audit');
+        }
+        
+        function stressTest() {
+            alert('🔥 Stress testing:\\n\\n1. Create many tasks quickly\\n2. Filter/search rapidly\\n3. Open multiple tabs\\n4. Test with slow network (DevTools)\\n5. Monitor memory usage');
+        }
+        
+        function measureMetrics() {
+            alert('📊 Measuring metrics:\\n\\n1. Use browser Performance tab\\n2. Record loading sequence\\n3. Check for memory leaks\\n4. Measure API response times\\n5. Test with different data sizes');
+        }
+        
+        // Progress tracking
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('#test-checklist input[type="checkbox"]');
+            const checked = document.querySelectorAll('#test-checklist input[type="checkbox"]:checked');
+            const progress = (checked.length / checkboxes.length) * 100;
+            
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress) + '% Complete';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            runAllSystemTests();
+            updateProgress();
+        });
+    </script>
+</body>
+</html>

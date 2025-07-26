@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive - Rewards Integration Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Test page specific styles */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        .test-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .result-section {
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .test-pass {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .test-fail {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .test-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .test-name {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .test-message {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .test-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .manual-test-steps {
+            margin: 15px 0;
+        }
+        
+        .step {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .step:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-tasks"></i>
+                <h1>TaskHive Rewards Integration Test</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Back to Dashboard</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <div class="test-card">
+                <h2>Rewards System Integration Tests</h2>
+                <p>This page allows you to test the integration of the rewards system with the TaskHive main application.</p>
+                
+                <div class="test-tabs">
+                    <div class="tab active" data-tab="automated">Automated Tests</div>
+                    <div class="tab" data-tab="manual">Manual Testing Guide</div>
+                    <div class="tab" data-tab="api">API Testing</div>
+                </div>
+                
+                <div class="tab-content active" id="automated-tab">
+                    <div class="test-actions">
+                        <button id="run-rewards-tests" class="primary-button">Run All Tests</button>
+                        <button id="check-rewards-data" class="secondary-button">Check Rewards Data</button>
+                    </div>
+                    
+                    <div id="test-results-container" class="result-section">
+                        <p>Test results will appear here...</p>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="manual-tab">
+                    <h3>Manual Testing Guide</h3>
+                    <p>Follow these steps to manually test the rewards integration:</p>
+                    
+                    <div class="manual-test-steps">
+                        <div class="step">
+                            <strong>Login</strong>: Log in to your TaskHive account or create a new one.
+                        </div>
+                        <div class="step">
+                            <strong>Dashboard</strong>: Check that the rewards summary panel appears on your dashboard showing your balance and level.
+                        </div>
+                        <div class="step">
+                            <strong>View History</strong>: Click "View History" to open the rewards modal and verify it shows your transaction history.
+                        </div>
+                        <div class="step">
+                            <strong>Redemption Options</strong>: Verify that redemption options are visible in the rewards modal.
+                        </div>
+                        <div class="step">
+                            <strong>Leaderboard</strong>: Check that the leaderboard is visible in the rewards modal.
+                        </div>
+                        <div class="step">
+                            <strong>Create Task</strong>: Create a new task using the "Create New Task" button.
+                        </div>
+                        <div class="step">
+                            <strong>Accept Task</strong>: In another account, accept the task you just created.
+                        </div>
+                        <div class="step">
+                            <strong>Complete Task</strong>: Mark the task as completed in the account that accepted it.
+                        </div>
+                        <div class="step">
+                            <strong>Verify Task</strong>: Verify the task completion in your original account.
+                        </div>
+                        <div class="step">
+                            <strong>Check Rewards</strong>: Verify that rewards were automatically calculated and added to the account that completed the task.
+                        </div>
+                    </div>
+                    
+                    <button id="mark-manual-tests" class="primary-button">Mark Tests Complete</button>
+                </div>
+                
+                <div class="tab-content" id="api-tab">
+                    <h3>API Testing</h3>
+                    <p>Test the rewards API endpoints directly:</p>
+                    
+                    <div class="test-actions">
+                        <button id="test-get-rewards" class="secondary-button">Test GET /rewards</button>
+                        <button id="test-add-rewards" class="secondary-button">Test POST /rewards/add</button>
+                        <button id="test-redeem-rewards" class="secondary-button">Test POST /rewards/redeem</button>
+                        <button id="test-leaderboard" class="secondary-button">Test GET /rewards/leaderboard</button>
+                    </div>
+                    
+                    <div id="api-results-container" class="result-section">
+                        <p>API test results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-card">
+                <h2>Documentation</h2>
+                <p>For detailed information about the rewards system, refer to the <a href="REWARDS_SYSTEM_DOCUMENTATION.md" target="_blank">Rewards System Documentation</a>.</p>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 TaskHive. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="auth.js"></script>
+    <script src="rewards-system.js"></script>
+    <script src="test_rewards_integration.js"></script>
+    <script>
+        // Tab navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = `${tab.dataset.tab}-tab`;
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // API test buttons
+        document.getElementById('test-get-rewards').addEventListener('click', async () => {
+            const resultContainer = document.getElementById('api-results-container');
+            resultContainer.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Testing GET /rewards...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/rewards', {
+                    headers: Auth.getAuthHeaders()
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultContainer.innerHTML = `
+                    <div class="test-result test-pass">
+                        <span class="test-icon">✅</span>
+                        <span class="test-name">GET /rewards</span>
+                        <span class="test-message">Success</span>
+                    </div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultContainer.innerHTML = `
+                    <div class="test-result test-fail">
+                        <span class="test-icon">❌</span>
+                        <span class="test-name">GET /rewards</span>
+                        <span class="test-message">Error: ${error.message}</span>
+                    </div>
+                `;
+            }
+        });
+        
+        document.getElementById('check-rewards-data').addEventListener('click', async () => {
+            const resultContainer = document.getElementById('test-results-container');
+            
+            try {
+                const rewardsData = await RewardsSystem.getUserRewardsData();
+                resultContainer.innerHTML = `
+                    <h4>Current Rewards Data:</h4>
+                    <pre>${JSON.stringify(rewardsData, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultContainer.innerHTML = `
+                    <div class="test-result test-fail">
+                        <span class="test-icon">❌</span>
+                        <span class="test-name">Get Rewards Data</span>
+                        <span class="test-message">Error: ${error.message}</span>
+                    </div>
+                `;
+            }
+        });
+        
+        // Set up other API test buttons with similar functionality
+        // ...
+    </script>
+</body>
+</html>

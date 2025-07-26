@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive - All Pages</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .links-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-header i {
+            font-size: 2rem;
+            margin-right: 15px;
+            color: #FF8A00;
+        }
+        .page-header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .links-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .links-section h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            color: #FF8A00;
+        }
+        .links-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .links-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+        }
+        .links-list li:last-child {
+            border-bottom: none;
+        }
+        .links-list i {
+            margin-right: 12px;
+            color: #FF8A00;
+            width: 20px;
+            text-align: center;
+        }
+        .links-list a {
+            color: #505050;
+            text-decoration: none;
+            display: block;
+            transition: color 0.3s;
+        }
+        .links-list a:hover {
+            color: #FF8A00;
+        }
+        .link-description {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 4px;
+        }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #FF8A00;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+        .back-button:hover {
+            background-color: #e67e00;
+        }
+        .back-button i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="links-container">
+        <div class="page-header">
+            <i class="fas fa-tasks"></i>
+            <h1>TaskHive - Navigation Links</h1>
+        </div>
+
+        <div class="links-section">
+            <h2>Main Pages</h2>
+            <ul class="links-list">
+                <li>
+                    <i class="fas fa-home"></i>
+                    <div>
+                        <a href="welcomepage1.html">Welcome Page</a>
+                        <span class="link-description">Landing page with login and signup options</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-th-large"></i>
+                    <div>
+                        <a href="dashboard.html">Dashboard</a>
+                        <span class="link-description">Main task dashboard with available tasks</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-tasks"></i>
+                    <div>
+                        <a href="my-tasks.html">My Tasks</a>
+                        <span class="link-description">View and manage tasks you've created or accepted</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <a href="completed-tasks.html">Completed Tasks</a>
+                        <span class="link-description">History of completed tasks</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <a href="profile.html">Profile</a>
+                        <span class="link-description">Your user profile and statistics</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-cog"></i>
+                    <div>
+                        <a href="settings.html">Settings</a>
+                        <span class="link-description">Account settings and preferences</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="links-section">
+            <h2>Test Pages</h2>
+            <ul class="links-list">
+                <li>
+                    <i class="fas fa-vial"></i>
+                    <div>
+                        <a href="test_rewards_integration.html">Rewards Integration Test</a>
+                        <span class="link-description">Test the AI rewards system integration</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-coins"></i>
+                    <div>
+                        <a href="test_rewards.html">Rewards Test</a>
+                        <span class="link-description">Test the rewards functionality</span>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <a href="location-test.html">Location Test</a>
+                        <span class="link-description">Test location tracking functionality</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <a href="dashboard.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</body>
+</html>

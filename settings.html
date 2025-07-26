@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive Settings</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <img src="https://placehold.co/100x100/orange/white?text=User" alt="User Avatar">
+                </div>
+                <h3 id="user-name">User Name</h3>
+                <p>TaskHive Member</p>
+            </div>
+            <div class="sidebar-menu">                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="my-tasks.html"><i class="fas fa-tasks"></i> My Tasks</a></li>
+                    <li><a href="completed-tasks.html"><i class="fas fa-check-circle"></i> Completed</a></li>
+                    <li><a href="dashboard.html#create-task-modal"><i class="fas fa-plus-circle"></i> Create Task</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="settings.html" class="active"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="taskhive_links.html"><i class="fas fa-link"></i> All Pages</a></li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h2>Settings</h2>
+                    <p>Customize your TaskHive experience</p>
+                </div>
+            </div>
+
+            <div class="settings-container">
+                <!-- Appearance Settings -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-palette"></i> Appearance</h3>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Dark Mode</h4>
+                            <p>Toggle dark mode for a more comfortable viewing experience in low light</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="dark-mode-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-bell"></i> Notifications</h3>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Task Notifications</h4>
+                            <p>Receive notifications when tasks are updated or when new ones are available</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notification-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-shield-alt"></i> Privacy</h3>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Location Sharing</h4>
+                            <p>Share your location to find tasks in your area</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="location-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Profile Visibility</h4>
+                            <p>Choose who can see your profile information</p>
+                        </div>
+                        <select id="profile-visibility">
+                            <option value="public">Everyone</option>
+                            <option value="connections">Connections Only</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-database"></i> Data Management</h3>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Export Your Data</h4>
+                            <p>Download all your TaskHive data as a JSON file</p>
+                        </div>
+                        <button class="secondary-button" id="export-data-btn">Export Data</button>
+                    </div>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Clear Local Data</h4>
+                            <p>Delete your locally stored data (only use this if you're experiencing issues)</p>
+                        </div>
+                        <button class="danger-button" id="clear-data-btn">Clear Data</button>
+                    </div>
+                </div>
+
+                <!-- Account Settings -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-user-cog"></i> Account</h3>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Change Password</h4>
+                            <p>Update your account password</p>
+                        </div>
+                        <button class="secondary-button" id="change-password-btn">Change Password</button>
+                    </div>
+                    <div class="settings-option">
+                        <div class="settings-info">
+                            <h4>Delete Account</h4>
+                            <p>Permanently delete your TaskHive account and all associated data</p>
+                        </div>
+                        <button class="danger-button" id="delete-account-btn">Delete Account</button>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="primary-button" id="save-settings-btn">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Change Password</h2>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <button type="submit" class="primary-button">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="delete-account-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Delete Account</h2>
+            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+            <form id="delete-account-form">
+                <div class="form-group">
+                    <label for="delete-password">Enter your password to confirm</label>
+                    <input type="password" id="delete-password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="secondary-button cancel-delete">Cancel</button>
+                    <button type="submit" class="danger-button">Delete Permanently</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Toast for notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="auth.js"></script>
+    <script src="location-tracker.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const userData = localStorage.getItem('taskhive_user');
+            console.log('User data from localStorage:', userData);
+            
+            if (!userData) {
+                console.log('No user data found, redirecting to welcome page');
+                window.location.href = 'welcomepage1.html';
+            } else {
+                console.log('User is logged in, initializing settings page');
+                const user = JSON.parse(userData);
+                document.getElementById('user-name').textContent = user.name;
+                
+                // Update user avatar
+                const userAvatar = document.querySelector('.user-avatar img');
+                if (user.profilePic) {
+                    userAvatar.src = user.profilePic;
+                } else {
+                    userAvatar.src = `https://placehold.co/100x100/orange/white?text=${user.name.charAt(0)}`;
+                }
+            }
+
+            // Load saved settings
+            const settings = JSON.parse(localStorage.getItem('taskhive_settings') || '{}');
+            
+            // Initialize toggle states
+            document.getElementById('dark-mode-toggle').checked = settings.darkMode || false;
+            document.getElementById('notification-toggle').checked = settings.notifications !== false; // Default to true
+            document.getElementById('location-toggle').checked = settings.locationSharing !== false; // Default to true
+            
+            // Set profile visibility
+            const visibilitySelect = document.getElementById('profile-visibility');
+            if (visibilitySelect) {
+                visibilitySelect.value = settings.profileVisibility || 'public';
+            }
+
+            // Immediately apply dark mode if it's enabled
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }            // Add immediate toggle for dark mode without waiting for save
+            document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+                // Call toggleDarkMode function from app.js
+                if (typeof toggleDarkMode === 'function') {
+                    toggleDarkMode(this.checked);
+                } else {
+                    // Fallback if function isn't available
+                    if (this.checked) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                }
+                // Update settings in localStorage immediately
+                const currentSettings = JSON.parse(localStorage.getItem('taskhive_settings') || '{}');
+                currentSettings.darkMode = this.checked;
+                localStorage.setItem('taskhive_settings', JSON.stringify(currentSettings));
+                
+                // Show a mini toast
+                showToast('Dark mode ' + (this.checked ? 'enabled' : 'disabled'), 'info');
+            });
+
+            // Save settings
+            document.getElementById('save-settings-btn').addEventListener('click', function() {
+                const updatedSettings = {
+                    darkMode: document.getElementById('dark-mode-toggle').checked,
+                    notifications: document.getElementById('notification-toggle').checked,
+                    locationSharing: document.getElementById('location-toggle').checked,
+                    profileVisibility: document.getElementById('profile-visibility').value
+                };
+                
+                localStorage.setItem('taskhive_settings', JSON.stringify(updatedSettings));
+                
+                // Apply dark mode immediately
+                if (updatedSettings.darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+                
+                // Show success toast
+                showToast('Settings saved successfully!', 'success');
+            });
+
+            // Export data
+            document.getElementById('export-data-btn').addEventListener('click', function() {
+                const userData = JSON.parse(localStorage.getItem('taskhive_user') || '{}');
+                const tasks = JSON.parse(localStorage.getItem('taskhive_tasks') || '[]');
+                const settings = JSON.parse(localStorage.getItem('taskhive_settings') || '{}');
+                
+                const exportData = {
+                    user: userData,
+                    tasks: tasks,
+                    settings: settings,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', `taskhive_data_${new Date().toISOString().split('T')[0]}.json`);
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                showToast('Data exported successfully!', 'success');
+            });
+
+            // Clear data
+            document.getElementById('clear-data-btn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all your local TaskHive data? This action cannot be undone.')) {
+                    localStorage.removeItem('taskhive_settings');
+                    localStorage.removeItem('taskhive_tasks');
+                    
+                    // Don't remove user data to prevent logout
+                    showToast('Local data has been cleared', 'success');
+                    
+                    // Reload the page to reset UI state
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            });
+
+            // Change password modal
+            const passwordModal = document.getElementById('password-modal');
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            const closePasswordModal = passwordModal.querySelector('.close-modal');
+            
+            changePasswordBtn.addEventListener('click', function() {
+                passwordModal.style.display = 'flex';
+            });
+            
+            closePasswordModal.addEventListener('click', function() {
+                passwordModal.style.display = 'none';
+            });
+            
+            document.getElementById('change-password-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // Simple validation
+                if (newPassword !== confirmPassword) {
+                    showToast('New passwords do not match', 'error');
+                    return;
+                }
+                
+                // Get user data
+                const userData = JSON.parse(localStorage.getItem('taskhive_user') || '{}');
+                
+                // In a real app, this would make an API call to verify and update the password
+                // For this demo, we'll just pretend it worked
+                
+                showToast('Password updated successfully!', 'success');
+                passwordModal.style.display = 'none';
+                
+                // Reset the form
+                document.getElementById('change-password-form').reset();
+            });
+
+            // Delete account modal
+            const deleteAccountModal = document.getElementById('delete-account-modal');
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            const closeDeleteModal = deleteAccountModal.querySelector('.close-modal');
+            const cancelDeleteBtn = deleteAccountModal.querySelector('.cancel-delete');
+            
+            deleteAccountBtn.addEventListener('click', function() {
+                deleteAccountModal.style.display = 'flex';
+            });
+            
+            closeDeleteModal.addEventListener('click', function() {
+                deleteAccountModal.style.display = 'none';
+            });
+            
+            cancelDeleteBtn.addEventListener('click', function() {
+                deleteAccountModal.style.display = 'none';
+            });
+            
+            document.getElementById('delete-account-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real app, this would verify the password and make an API call
+                // For this demo, we'll just remove the user data and redirect
+                
+                localStorage.removeItem('taskhive_user');
+                localStorage.removeItem('taskhive_tasks');
+                localStorage.removeItem('taskhive_settings');
+                
+                showToast('Account deleted successfully. Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'welcomepage1.html';
+                }, 2000);
+            });
+
+            // Mobile Menu Toggle
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    // Change icon based on sidebar state
+                    const icon = this.querySelector('i');
+                    if (sidebar.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+                
+                // Close sidebar when clicking on a menu item (mobile only)
+                if (window.innerWidth <= 768) {
+                    const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+                    sidebarLinks.forEach(link => {
+                        link.addEventListener('click', function() {
+                            sidebar.classList.remove('active');
+                            const icon = mobileMenuToggle.querySelector('i');
+                            icon.classList.remove('fa-times');
+                            icon.classList.add('fa-bars');
+                        });
+                    });
+                }
+            }
+
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('taskhive_user');
+                window.location.href = 'welcomepage1.html';
+            });
+        });
+
+        // Toast notification helper function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Set icon based on type
+            const iconClass = type === 'success' ? 'check-circle' : 
+                             type === 'error' ? 'exclamation-circle' : 
+                             'info-circle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${iconClass}"></i>
+                </div>
+                <div class="toast-content">
+                    <p>${message}</p>
+                </div>
+                <div class="toast-close">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            // Add to container
+            toastContainer.appendChild(toast);
+            
+            // Add event listener for close button
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                toast.remove();
+            });
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

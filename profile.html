@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <img src="https://placehold.co/100x100/orange/white?text=User" alt="User Avatar" id="sidebar-avatar">
+                </div>
+                <h3 id="user-name">User Name</h3>
+                <p>TaskHive Member</p>
+            </div>
+            <div class="sidebar-menu">                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="my-tasks.html"><i class="fas fa-tasks"></i> My Tasks</a></li>
+                    <li><a href="completed-tasks.html"><i class="fas fa-check-circle"></i> Completed</a></li>
+                    <li><a href="dashboard.html#create-task-modal"><i class="fas fa-plus-circle"></i> Create Task</a></li>
+                    <li><a href="profile.html" class="active"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="taskhive_links.html"><i class="fas fa-link"></i> All Pages</a></li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h2>My Profile</h2>
+                    <p>Manage your personal information and preferences</p>
+                </div>
+                <div class="dashboard-actions">
+                    <button class="primary-button" id="save-profile-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-container">
+                <!-- Profile Picture Section -->
+                <div class="profile-section profile-picture-section">
+                    <h3><i class="fas fa-camera"></i> Profile Picture</h3>
+                    <div class="profile-picture-container">
+                        <div class="profile-picture">
+                            <img src="https://placehold.co/300x300/orange/white?text=User" alt="Profile Picture" id="profile-picture-preview">
+                            <div class="profile-picture-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="profile-picture-options">
+                            <h4>Change Your Picture</h4>
+                            <div class="profile-picture-buttons">
+                                <button class="secondary-button" id="upload-picture-btn">
+                                    <i class="fas fa-upload"></i> Upload Photo
+                                </button>
+                                <button class="secondary-button" id="camera-picture-btn">
+                                    <i class="fas fa-camera"></i> Take Photo
+                                </button>
+                                <button class="secondary-button" id="url-picture-btn">
+                                    <i class="fas fa-link"></i> Use URL
+                                </button>
+                                <button class="secondary-button" id="avatar-picture-btn">
+                                    <i class="fas fa-user-circle"></i> Generate Avatar
+                                </button>
+                            </div>
+                            <input type="file" id="picture-upload" accept="image/*" style="display: none;">
+                            <div id="url-input-container" style="display: none;">
+                                <input type="text" id="picture-url" placeholder="Enter image URL...">
+                                <button class="secondary-button" id="load-url-btn">Load</button>
+                            </div>
+                            <div id="avatar-options" style="display: none;" class="avatar-options">
+                                <div class="avatar-color" style="background-color: #FF6B6B;" data-color="#FF6B6B"></div>
+                                <div class="avatar-color" style="background-color: #4ECDC4;" data-color="#4ECDC4"></div>
+                                <div class="avatar-color" style="background-color: #F9A826;" data-color="#F9A826"></div>
+                                <div class="avatar-color" style="background-color: #6A0572;" data-color="#6A0572"></div>
+                                <div class="avatar-color" style="background-color: #1A535C;" data-color="#1A535C"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information Section -->
+                <div class="profile-section personal-info-section">
+                    <h3><i class="fas fa-user-edit"></i> Personal Information</h3>
+                    <div class="profile-form">
+                        <div class="form-group">
+                            <label for="full-name">Full Name</label>
+                            <input type="text" id="full-name" placeholder="Your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" placeholder="Your email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number (optional)</label>
+                            <input type="tel" id="phone" placeholder="Your phone number">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location (optional)</label>
+                            <input type="text" id="location" placeholder="Your location">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills & Interests Section -->
+                <div class="profile-section skills-section">
+                    <h3><i class="fas fa-tools"></i> Skills & Interests</h3>
+                    <div class="skills-container">
+                        <div class="form-group full-width">
+                            <label>Add Skills (helps match you with relevant tasks)</label>
+                            <div class="skills-input-container">
+                                <input type="text" id="skill-input" placeholder="Add a skill and press Enter">
+                                <button class="primary-button" id="add-skill-btn">Add</button>
+                            </div>
+                            <div class="skills-tags" id="skills-list">
+                                <!-- Skills will be added here -->
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Areas of Interest</label>
+                            <div class="interests-checkboxes">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-delivery">
+                                    <label for="interest-delivery">Delivery</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-tutoring">
+                                    <label for="interest-tutoring">Tutoring</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-labor">
+                                    <label for="interest-labor">Manual Labor</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-tech">
+                                    <label for="interest-tech">Tech Support</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-cleaning">
+                                    <label for="interest-cleaning">Cleaning</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-shopping">
+                                    <label for="interest-shopping">Shopping</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Privacy Section -->
+                <div class="profile-section privacy-section">
+                    <h3><i class="fas fa-shield-alt"></i> Profile Privacy</h3>
+                    <div class="privacy-options">
+                        <div class="toggle-option">
+                            <span class="toggle-label">Make profile public</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="profile-public">
+                                <label for="profile-public"></label>
+                            </div>
+                        </div>
+                        <div class="toggle-option">
+                            <span class="toggle-label">Show my contact information</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="show-contact">
+                                <label for="show-contact"></label>
+                            </div>
+                        </div>
+                        <div class="toggle-option">
+                            <span class="toggle-label">Share my task history</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="share-history">
+                                <label for="share-history"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Stats Section -->                <div class="profile-section stats-section">
+                    <h3><i class="fas fa-chart-bar"></i> Task Statistics</h3>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="stat-data">
+                                <span class="stat-number" id="created-tasks-count">0</span>
+                                <span class="stat-text">Tasks Created</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-data">
+                                <span class="stat-number" id="completed-tasks-count">0</span>
+                                <span class="stat-text">Tasks Completed</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-data">
+                                <span class="stat-number" id="rating-value">0.0</span>
+                                <span class="stat-text">Overall Rating</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="stat-data">
+                                <span class="stat-number" id="member-days">0</span>
+                                <span class="stat-text">Days as Member</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Ratings Section -->
+                <div class="profile-section ratings-section">
+                    <h3><i class="fas fa-star"></i> Detailed Ratings</h3>
+                    <div class="detailed-ratings-container">
+                        <div class="rating-column">
+                            <h4>As Task Completer</h4>
+                            <div class="rating-value-container">
+                                <span class="detailed-rating-number" id="task-rating-value">0.0</span>
+                                <div class="detailed-star-rating" id="task-star-rating"></div>
+                            </div>
+                            <p class="rating-description">This rating reflects how well you complete tasks assigned to you.</p>
+                        </div>
+                        
+                        <div class="rating-column">
+                            <h4>As Task Creator</h4>
+                            <div class="rating-value-container">
+                                <span class="detailed-rating-number" id="user-rating-value">0.0</span>
+                                <div class="detailed-star-rating" id="user-star-rating"></div>
+                            </div>
+                            <p class="rating-description">This rating reflects your interaction with people who complete your tasks.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="camera-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Take a Photo</h2>
+            <div class="camera-container">
+                <video id="camera-feed" autoplay></video>
+                <canvas id="camera-canvas" style="display: none;"></canvas>
+                <div class="camera-actions">
+                    <button id="capture-btn" class="primary-button">
+                        <i class="fas fa-camera"></i> Capture
+                    </button>
+                    <button id="retake-btn" class="secondary-button" style="display: none;">
+                        <i class="fas fa-redo"></i> Retake
+                    </button>
+                    <button id="use-photo-btn" class="primary-button" style="display: none;">
+                        <i class="fas fa-check"></i> Use Photo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="auth.js"></script>
+    <script src="location-tracker.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            if (!localStorage.getItem('taskhive_user')) {
+                window.location.href = 'welcomepage1.html';
+                return;
+            }
+
+            // Load user profile data
+            loadUserProfile();
+
+            // Set up event listeners
+            setupProfileEventListeners();
+            
+            // Set up storage event listener for cross-tab synchronization
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'taskhive_user') {
+                    // Reload user profile data when it changes in another tab
+                    loadUserProfile();
+                }
+            });
+        });
+
+        // Function to load user profile data
+        function loadUserProfile() {
+            const userData = JSON.parse(localStorage.getItem('taskhive_user') || '{}');
+            if (!userData.id) {
+                window.location.href = 'welcomepage1.html';
+                return;
+            }
+
+            // Update form fields with user data
+            document.getElementById('full-name').value = userData.name || '';
+            document.getElementById('email').value = userData.email || '';
+            document.getElementById('phone').value = userData.phone || '';
+            document.getElementById('location').value = userData.location || '';
+            document.getElementById('bio').value = userData.bio || '';
+
+            // Update profile pictures
+            const profilePicSrc = userData.profilePic || generateAvatarUrl(userData.name, '#F9A826');
+            document.getElementById('profile-picture-preview').src = profilePicSrc;
+            document.getElementById('sidebar-avatar').src = profilePicSrc;
+            document.getElementById('user-name').textContent = userData.name;
+
+            // Load skills
+            if (userData.skills && Array.isArray(userData.skills)) {
+                const skillsList = document.getElementById('skills-list');
+                skillsList.innerHTML = '';
+                userData.skills.forEach(skill => {
+                    addSkillTag(skill);
+                });
+            }
+
+            // Load interests
+            if (userData.interests) {
+                Object.keys(userData.interests).forEach(interest => {
+                    const checkbox = document.getElementById(`interest-${interest}`);
+                    if (checkbox) {
+                        checkbox.checked = userData.interests[interest];
+                    }
+                });
+            }
+
+            // Load privacy settings
+            document.getElementById('profile-public').checked = userData.privacy?.isPublic || false;
+            document.getElementById('show-contact').checked = userData.privacy?.showContact || false;
+            document.getElementById('share-history').checked = userData.privacy?.shareHistory || false;
+
+            // Load statistics
+            loadUserStatistics(userData.id);
+        }
+
+        // Function to set up event listeners
+        function setupProfileEventListeners() {
+            // Profile picture options
+            document.getElementById('upload-picture-btn').addEventListener('click', () => {
+                document.getElementById('picture-upload').click();
+            });
+
+            document.getElementById('picture-upload').addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('profile-picture-preview').src = e.target.result;
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            document.getElementById('url-picture-btn').addEventListener('click', () => {
+                const urlContainer = document.getElementById('url-input-container');
+                urlContainer.style.display = urlContainer.style.display === 'none' ? 'block' : 'none';
+                document.getElementById('avatar-options').style.display = 'none';
+            });
+
+            document.getElementById('load-url-btn').addEventListener('click', () => {
+                const url = document.getElementById('picture-url').value;
+                if (url) {
+                    document.getElementById('profile-picture-preview').src = url;
+                    document.getElementById('url-input-container').style.display = 'none';
+                }
+            });
+
+            document.getElementById('avatar-picture-btn').addEventListener('click', () => {
+                const avatarOptions = document.getElementById('avatar-options');
+                avatarOptions.style.display = avatarOptions.style.display === 'none' ? 'flex' : 'none';
+                document.getElementById('url-input-container').style.display = 'none';
+            });
+
+            // Avatar color selection
+            document.querySelectorAll('.avatar-color').forEach(colorEl => {
+                colorEl.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    const name = document.getElementById('full-name').value;
+                    document.getElementById('profile-picture-preview').src = generateAvatarUrl(name, color);
+                    document.getElementById('avatar-options').style.display = 'none';
+                });
+            });
+
+            // Camera functionality
+            document.getElementById('camera-picture-btn').addEventListener('click', openCameraModal);
+
+            document.querySelector('#camera-modal .close-modal').addEventListener('click', closeCameraModal);
+
+            document.getElementById('capture-btn').addEventListener('click', capturePhoto);
+
+            document.getElementById('retake-btn').addEventListener('click', () => {
+                document.getElementById('camera-feed').style.display = 'block';
+                document.getElementById('camera-canvas').style.display = 'none';
+                document.getElementById('capture-btn').style.display = 'block';
+                document.getElementById('retake-btn').style.display = 'none';
+                document.getElementById('use-photo-btn').style.display = 'none';
+            });
+
+            document.getElementById('use-photo-btn').addEventListener('click', usePhoto);
+
+            // Add skill button
+            document.getElementById('add-skill-btn').addEventListener('click', function() {
+                const skillInput = document.getElementById('skill-input');
+                if (skillInput.value.trim()) {
+                    addSkillTag(skillInput.value.trim());
+                    skillInput.value = '';
+                }
+            });
+            
+            // Add skill with Enter key
+            document.getElementById('skill-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.value.trim()) {
+                        addSkillTag(this.value.trim());
+                        this.value = '';
+                    }
+                }
+            });
+
+            // Save profile button
+            document.getElementById('save-profile-btn').addEventListener('click', saveUserProfile);
+
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (sidebar.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            }
+
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('taskhive_user');
+                window.location.href = 'welcomepage1.html';
+            });
+        }
+
+        // Function to open camera modal
+        function openCameraModal() {
+            const modal = document.getElementById('camera-modal');
+            modal.style.display = 'flex';
+
+            // Access the camera
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                .then(stream => {
+                    const video = document.getElementById('camera-feed');
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error('Error accessing camera:', err);
+                    alert('Could not access camera. Please make sure you have granted camera permissions.');
+                    modal.style.display = 'none';
+                });
+        }
+
+        // Function to close camera modal
+        function closeCameraModal() {
+            const modal = document.getElementById('camera-modal');
+            modal.style.display = 'none';
+
+            // Stop camera stream
+            const video = document.getElementById('camera-feed');
+            if (video.srcObject) {
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            // Reset camera UI
+            document.getElementById('camera-feed').style.display = 'block';
+            document.getElementById('camera-canvas').style.display = 'none';
+            document.getElementById('capture-btn').style.display = 'block';
+            document.getElementById('retake-btn').style.display = 'none';
+            document.getElementById('use-photo-btn').style.display = 'none';
+        }
+
+        // Function to capture photo
+        function capturePhoto() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('camera-canvas');
+            const context = canvas.getContext('2d');
+
+            // Set canvas dimensions to video dimensions
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Show canvas, hide video
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+
+            // Show retake and use buttons, hide capture button
+            document.getElementById('capture-btn').style.display = 'none';
+            document.getElementById('retake-btn').style.display = 'inline-block';
+            document.getElementById('use-photo-btn').style.display = 'inline-block';
+        }
+
+        // Function to use captured photo
+        function usePhoto() {
+            const canvas = document.getElementById('camera-canvas');
+            const photoUrl = canvas.toDataURL('image/png');
+            
+            // Set the captured photo as profile picture
+            document.getElementById('profile-picture-preview').src = photoUrl;
+
+            // Close the camera modal
+            closeCameraModal();
+        }
+
+        // Function to generate avatar URL
+        function generateAvatarUrl(name, backgroundColor) {
+            const initial = name ? name.charAt(0).toUpperCase() : 'U';
+            return `https://placehold.co/300x300/${backgroundColor.replace('#', '')}/${backgroundColor === '#F9A826' ? 'white' : 'white'}?text=${initial}`;
+        }
+
+        // Function to add a skill tag
+        function addSkillTag(skill) {
+            const skillsList = document.getElementById('skills-list');
+            
+            // Check if skill already exists
+            const existingSkills = skillsList.querySelectorAll('.skill-tag');
+            for (let i = 0; i < existingSkills.length; i++) {
+                if (existingSkills[i].querySelector('span').textContent.toLowerCase() === skill.toLowerCase()) {
+                    return; // Skill already exists
+                }
+            }
+            
+            const skillTag = document.createElement('div');
+            skillTag.className = 'skill-tag';
+            skillTag.innerHTML = `
+                <span>${skill}</span>
+                <i class="fas fa-times remove-skill"></i>
+            `;
+            
+            // Add remove event listener
+            skillTag.querySelector('.remove-skill').addEventListener('click', function() {
+                skillsList.removeChild(skillTag);
+            });
+            
+            skillsList.appendChild(skillTag);
+        }        // Function to save user profile
+        function saveUserProfile() {
+            // Show loading spinner
+            document.getElementById('loading-spinner').style.display = 'flex';
+
+            try {
+                // Get current user data
+                const userData = JSON.parse(localStorage.getItem('taskhive_user') || '{}');
+                
+                // Update with form data
+                userData.name = document.getElementById('full-name').value;
+                userData.email = document.getElementById('email').value;
+                userData.phone = document.getElementById('phone').value;
+                userData.location = document.getElementById('location').value;
+                userData.bio = document.getElementById('bio').value;
+                userData.profilePic = document.getElementById('profile-picture-preview').src;
+                
+                // Gather skills
+                const skillTags = document.querySelectorAll('.skill-tag span');
+                userData.skills = Array.from(skillTags).map(span => span.textContent);
+                
+                // Gather interests
+                userData.interests = {
+                    delivery: document.getElementById('interest-delivery').checked,
+                    tutoring: document.getElementById('interest-tutoring').checked,
+                    labor: document.getElementById('interest-labor').checked,
+                    tech: document.getElementById('interest-tech').checked,
+                    cleaning: document.getElementById('interest-cleaning').checked,
+                    shopping: document.getElementById('interest-shopping').checked
+                };
+                
+                // Gather privacy settings
+                userData.privacy = {
+                    isPublic: document.getElementById('profile-public').checked,
+                    showContact: document.getElementById('show-contact').checked,
+                    shareHistory: document.getElementById('share-history').checked
+                };
+                
+                // Save profile data - first to current user
+                localStorage.setItem('taskhive_user', JSON.stringify(userData));
+                
+                // Update user data in taskhive_users as well
+                const allUsers = JSON.parse(localStorage.getItem('taskhive_users') || '[]');
+                const userIndex = allUsers.findIndex(user => user.id === userData.id);
+                
+                if (userIndex !== -1) {
+                    // Update everything except password
+                    const { password } = allUsers[userIndex];
+                    allUsers[userIndex] = { ...userData, password };
+                    localStorage.setItem('taskhive_users', JSON.stringify(allUsers));
+                }
+                
+                // Update sidebar avatar
+                document.getElementById('sidebar-avatar').src = userData.profilePic;
+                
+                // Force a storage event to trigger updates in other tabs
+                const storageEvent = new StorageEvent('storage', {
+                    key: 'taskhive_user',
+                    newValue: JSON.stringify(userData),
+                    url: window.location.href
+                });
+                window.dispatchEvent(storageEvent);
+                
+                // Show success message
+                showToast('Profile updated successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showToast('Error saving profile. Please try again.', 'error');
+            } finally {
+                // Hide loading spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+            }
+        }
+        
+        // Function to load user statistics
+        function loadUserStatistics(userId) {
+            console.log("Loading statistics for user ID:", userId);
+            // Always recalculate from tasks for latest data
+            const tasks = JSON.parse(localStorage.getItem('taskhive_tasks') || '[]');
+            const users = JSON.parse(localStorage.getItem('taskhive_users') || '[]');
+            let user = users.find(u => String(u.id) === String(userId));
+            let createdCount = 0;
+            let completedCount = 0;
+            let taskRatingTotal = 0;
+            let taskRatingCount = 0;
+            let userRatingTotal = 0;
+            let userRatingCount = 0;
+            tasks.forEach(task => {
+                if (String(task.createdBy) === String(userId)) {
+                    createdCount++;
+                    if (task.userRating) {
+                        userRatingTotal += task.userRating;
+                        userRatingCount++;
+                    }
+                }
+                if (String(task.assignedTo) === String(userId) && (task.status === 'verified' || task.status === 'awaiting-verification')) {
+                    completedCount++;
+                    if (task.taskRating) {
+                        taskRatingTotal += task.taskRating;
+                        taskRatingCount++;
+                    }
+                }
+            });
+            // Update user object with latest stats and ratings
+            if (user) {
+                user.stats = user.stats || {};
+                user.stats.tasksCreated = createdCount;
+                user.stats.tasksCompleted = completedCount;
+                user.ratings = user.ratings || { asCreator: [], asCompleter: [] };
+                user.ratings.asCreator = [];
+                user.ratings.asCompleter = [];
+                tasks.forEach(task => {
+                    if (String(task.createdBy) === String(userId) && task.userRating) user.ratings.asCreator.push(task.userRating);
+                    if (String(task.assignedTo) === String(userId) && task.taskRating) user.ratings.asCompleter.push(task.taskRating);
+                });
+                localStorage.setItem('taskhive_users', JSON.stringify(users));
+            }
+            
+            // Update UI with the calculated statistics
+            document.getElementById('created-tasks-count').textContent = createdCount;
+            document.getElementById('completed-tasks-count').textContent = completedCount;
+            
+            // Calculate days as member
+            const userData = JSON.parse(localStorage.getItem('taskhive_user') || '{}');
+            if (userData.createdAt) {
+                const createdDate = new Date(userData.createdAt);
+                const today = new Date();
+                const diffTime = Math.abs(today - createdDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                document.getElementById('member-days').textContent = diffDays;
+            } else {
+                // If no createdAt date, set to at least 1 day
+                document.getElementById('member-days').textContent = '1';
+            }
+            
+            // Calculate average ratings
+            let taskAverageRating;
+            let userAverageRating;
+            let overallRating;
+            
+            // Calculate task rating (as completer)
+            if (taskRatingCount > 0) {
+                taskAverageRating = (taskRatingTotal / taskRatingCount).toFixed(1);
+            } else {
+                taskAverageRating = '0.0';
+            }
+            
+            // Calculate user rating (as creator)
+            if (userRatingCount > 0) {
+                userAverageRating = (userRatingTotal / userRatingCount).toFixed(1);
+            } else {
+                userAverageRating = '0.0';
+            }
+            
+            // Calculate overall rating (weighted average if both exist)
+            if (taskRatingCount > 0 || userRatingCount > 0) {
+                const totalWeightedSum = (taskRatingTotal + userRatingTotal);
+                const totalCount = (taskRatingCount + userRatingCount);
+                overallRating = (totalWeightedSum / totalCount).toFixed(1);
+            } else {
+                // Default rating if none exists
+                overallRating = '0.0';
+            }
+            
+            document.getElementById('rating-value').textContent = overallRating;
+            
+            // Update the detailed ratings if the containers exist
+            if (document.getElementById('task-rating-value')) {
+                document.getElementById('task-rating-value').textContent = taskAverageRating;
+            }
+            
+            if (document.getElementById('user-rating-value')) {
+                document.getElementById('user-rating-value').textContent = userAverageRating;
+            }
+            
+            // Update star rating display
+            updateStarRating(parseFloat(overallRating));
+            
+            // Update detailed rating displays if they exist
+            if (document.getElementById('task-star-rating')) {
+                updateDetailedStarRating('task-star-rating', parseFloat(taskAverageRating));
+            }
+            
+            if (document.getElementById('user-star-rating')) {
+                updateDetailedStarRating('user-star-rating', parseFloat(userAverageRating));
+            }
+            
+            console.log(`User statistics loaded - Created: ${createdCount}, Completed: ${completedCount}, Overall Rating: ${overallRating}`);
+            console.log(`Detailed Ratings - As Completer: ${taskAverageRating} (${taskRatingCount} ratings), As Creator: ${userAverageRating} (${userRatingCount} ratings)`);
+        }
+        
+        // Function to create sample tasks for demonstration
+        function createSampleTasks(userId) {
+            console.log("Creating sample tasks for user:", userId);
+            const tasks = [];
+            
+            // Sample created task
+            tasks.push({
+                id: 'task_' + Date.now(),
+                title: 'Sample Task 1',
+                description: 'This is a sample task to demonstrate functionality',
+                timeWindow: 60,
+                location: 'Sample Location',
+                type: 'delivery',
+                status: 'available',
+                createdBy: userId,
+                createdAt: new Date().toISOString()
+            });
+            
+            // Sample completed task
+            tasks.push({
+                id: 'task_' + (Date.now() + 1),
+                title: 'Sample Completed Task',
+                description: 'This is a sample completed task',
+                timeWindow: 30,
+                location: 'Another Location',
+                type: 'assistance',
+                status: 'verified',
+                createdBy: 'other-user-id',
+                assignedTo: userId,
+                startTime: new Date(Date.now() - 86400000).toISOString(),
+                completedAt: new Date(Date.now() - 43200000).toISOString(),
+                verifiedAt: new Date(Date.now() - 21600000).toISOString(),
+                rating: 5
+            });
+            
+            // Save tasks
+            localStorage.setItem('taskhive_tasks', JSON.stringify(tasks));
+            console.log("Sample tasks created:", tasks.length);
+        }
+        
+        // Function to update star rating display
+        function updateStarRating(rating) {
+            // Add star rating display to the rating UI
+            const ratingElement = document.querySelector('.stat-card:nth-child(3) .stat-data');
+            
+            // Check if star display already exists
+            if (!document.querySelector('.star-rating-display')) {
+                const starDisplay = document.createElement('div');
+                starDisplay.className = 'star-rating-display';
+                ratingElement.appendChild(starDisplay);
+                
+                // Create 5 stars
+                for (let i = 0; i < 5; i++) {
+                    const star = document.createElement('i');
+                    star.className = 'fas fa-star';
+                    starDisplay.appendChild(star);
+                }
+            }
+            
+            // Update star fill
+            const stars = document.querySelectorAll('.star-rating-display .fa-star');
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            stars.forEach((star, index) => {
+                if (index < fullStars) {
+                    star.style.color = '#F9A826'; // Full star
+                } else if (index === fullStars && hasHalfStar) {
+                    star.className = 'fas fa-star-half-alt';
+                    star.style.color = '#F9A826'; // Half star
+                } else {
+                    star.style.color = '#ccc'; // Empty star
+                }
+            });
+        }
+        
+        // Function to update detailed star ratings
+        function updateDetailedStarRating(containerid, rating) {
+            const container = document.getElementById(containerid);
+            if (!container) return;
+            
+            // Clear existing stars
+            container.innerHTML = '';
+            
+            // Create 5 stars
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('i');
+                
+                if (i < Math.floor(rating)) {
+                    star.className = 'fas fa-star';
+                    star.style.color = '#F9A826'; // Full star
+                } else if (i === Math.floor(rating) && rating % 1 >= 0.5) {
+                    star.className = 'fas fa-star-half-alt';
+                    star.style.color = '#F9A826'; // Half star
+                } else {
+                    star.className = 'far fa-star';
+                    star.style.color = '#ccc'; // Empty star
+                }
+                
+                container.appendChild(star);
+            }
+        }
+
+        // Function to show toast notification
+        function showToast(message, type = 'info') {
+            // Remove any existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                document.body.removeChild(existingToast);
+            }
+            
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                </div>
+                <div class="toast-content">
+                    <p>${message}</p>
+                </div>
+                <div class="toast-close">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            // Append to body
+            document.body.appendChild(toast);
+            
+            // Add close event listener
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                document.body.removeChild(toast);
+            });
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

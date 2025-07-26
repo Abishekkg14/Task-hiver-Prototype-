@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Debug Test</title>
+</head>
+<body>
+    <h1>Signup Debug Test</h1>
+    
+    <form id="signup-form">
+        <div>
+            <label for="signup-name">Full Name</label>
+            <input type="text" id="signup-name" value="Debug User" required>
+        </div>
+        <div>
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" value="debug@example.com" required>
+        </div>
+        <div>
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" value="debug123" required>
+        </div>
+        <div>
+            <label for="signup-confirm">Confirm Password</label>
+            <input type="password" id="signup-confirm" value="debug123" required>
+        </div>
+        <button type="submit">Create Account</button>
+    </form>
+    
+    <div id="debug-output"></div>
+    
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug signup page loaded');
+            console.log('Auth object available:', typeof Auth !== 'undefined');
+            
+            const signupForm = document.getElementById('signup-form');
+            const debugOutput = document.getElementById('debug-output');
+            
+            function log(message) {
+                console.log(message);
+                debugOutput.innerHTML += '<p>' + message + '</p>';
+            }
+            
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                log('Form submitted');
+                
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm').value;
+                
+                log(`Form data: name=${name}, email=${email}, password=***`);
+                
+                if (password !== confirmPassword) {
+                    log('ERROR: Passwords do not match');
+                    return;
+                }
+                
+                if (typeof Auth === 'undefined') {
+                    log('ERROR: Auth module not available');
+                    return;
+                }
+                
+                try {
+                    log('Calling Auth.register...');
+                    const result = await Auth.register(name, email, password);
+                    log('SUCCESS: Registration completed');
+                    log('Result: ' + JSON.stringify(result, null, 2));
+                } catch (error) {
+                    log('ERROR: ' + error.message);
+                    log('Full error: ' + JSON.stringify(error, null, 2));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

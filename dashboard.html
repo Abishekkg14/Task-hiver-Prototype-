@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskHive Dashboard</title>    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <img src="https://placehold.co/100x100/orange/white?text=User" alt="User Avatar">
+                </div>
+                <h3 id="user-name">User Name</h3>
+                <p>TaskHive Member</p>
+            </div>            <div class="sidebar-menu">                <ul>
+                    <li><a href="dashboard.html" class="active"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="my-tasks.html"><i class="fas fa-tasks"></i> My Tasks</a></li>
+                    <li><a href="completed-tasks.html"><i class="fas fa-check-circle"></i> Completed</a></li>
+                    <li><a href="#create-task-modal"><i class="fas fa-plus-circle"></i> Create Task</a></li>
+                    <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="taskhive_links.html"><i class="fas fa-link"></i> All Pages</a></li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>        </div>        <div class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h2>Task Dashboard</h2>
+                    <p>Find and manage tasks in your community</p>
+                </div>
+                <div class="dashboard-actions">
+                    <button class="secondary-button" id="check-mongodb-btn">
+                        <i class="fas fa-database"></i> Check MongoDB
+                    </button>
+                    <button class="primary-button" id="create-new-task-btn">
+                        <i class="fas fa-plus"></i> Create New Task
+                    </button>
+                </div>
+            </div>
+              <!-- Rewards Summary Section -->
+            <div class="rewards-summary-panel">
+                <h3><i class="fas fa-coins"></i> AI Rewards</h3>
+                <div class="rewards-summary-content">
+                    <div class="rewards-stat">
+                        <p class="rewards-label">Available Balance</p>
+                        <p class="rewards-amount" id="available-balance">$0.00</p>
+                    </div>
+                    <div class="rewards-stat">
+                        <p class="rewards-label">Total Earned</p>
+                        <p class="rewards-amount" id="total-earned">$0.00</p>
+                    </div>
+                    <div class="rewards-stat">
+                        <p class="rewards-label">Level</p>
+                        <p class="rewards-level" id="rewards-level">Beginner</p>
+                    </div>
+                    <button class="secondary-button" id="view-rewards-history-btn">
+                        <i class="fas fa-history"></i> View History
+                    </button>
+                </div>
+            </div>
+            
+            <div class="task-filters">
+                <div class="filter-group">
+                    <label for="status-filter">Status:</label>
+                    <select id="status-filter">
+                        <option value="all">All</option>
+                        <option value="available">Available</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="awaiting-verification">Awaiting Verification</option>
+                        <option value="verified">Verified</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="time-filter">Time Window:</label>
+                    <select id="time-filter">
+                        <option value="all">All</option>
+                        <option value="30">< 30 min</option>
+                        <option value="60">< 1 hour</option>
+                        <option value="120">< 2 hours</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="text" id="search-tasks" placeholder="Search tasks...">
+                </div>
+            </div>
+            
+            <div id="task-grid" class="task-grid">
+                <!-- Tasks will be loaded here dynamically -->
+                <div class="task-card">
+                    <div class="task-status status-available">Available</div>
+                    <h3 class="task-title">Pick up groceries from the store</h3>
+                    <p class="task-details">Need someone to pick up my grocery order from Whole Foods. It's already paid for, just need pick up.</p>
+                    <div class="task-time">
+                        <i class="fas fa-clock"></i>
+                        <span>30 minutes</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="secondary-button">View Info</button>
+                        <button class="primary-button">Accept Task</button>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-status status-in-progress">In Progress</div>
+                    <h3 class="task-title">Deliver package to the post office</h3>
+                    <p class="task-details">Need someone to take my pre-paid package to the post office. It's not heavy, just a small box.</p>
+                    <div class="task-time">
+                        <i class="fas fa-clock"></i>
+                        <span>45 minutes</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="secondary-button">View Info</button>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-status status-awaiting">Awaiting Verification</div>
+                    <h3 class="task-title">Return library books</h3>
+                    <p class="task-details">Need someone to return three books to the university library before closing time at 6pm.</p>
+                    <div class="task-time">
+                        <i class="fas fa-clock"></i>
+                        <span>60 minutes</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="secondary-button">View Info</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div id="create-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Create New Task</h2>
+            <form id="create-task-form">
+                <div class="form-group">
+                    <label for="task-title">Task Title</label>
+                    <input type="text" id="task-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" rows="4" required></textarea>
+                </div>                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="task-time">Time Window (minutes)</label>
+                            <input type="number" id="task-time" min="5" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="task-location">Location (optional)</label>
+                            <input type="text" id="task-location">
+                            <small>Enter a full address for accurate mapping</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="task-type">Task Type</label>
+                    <select id="task-type" required>
+                        <option value="delivery">Delivery</option>
+                        <option value="errand">Errand</option>
+                        <option value="assistance">Assistance</option>
+                        <option value="repairs">Repairs</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div id="location-preview-map" style="height: 0; overflow: hidden; transition: height 0.3s ease;"></div>
+                <button type="submit" class="primary-button">Create Task</button>
+            </form>
+        </div>
+    </div>    <!-- Mobile Menu Toggle Button -->
+    <div class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+      <!-- Rewards History Modal -->
+    <div id="rewards-history-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-coins"></i> Rewards Dashboard</h2>
+            <div class="rewards-history-summary">
+                <div class="rewards-stat-large">
+                    <p class="rewards-label">Available Balance</p>
+                    <p class="rewards-amount-large" id="modal-available-balance">$0.00</p>
+                </div>
+                <div class="rewards-stat-large">
+                    <p class="rewards-label">Total Earned</p>
+                    <p class="rewards-amount-large" id="modal-total-earned">$0.00</p>
+                </div>
+                <div class="rewards-stat-large">
+                    <p class="rewards-label">Reward Level</p>
+                    <p class="rewards-level-large" id="modal-rewards-level">Beginner</p>
+                    <div class="level-progress-container" id="level-progress-container">
+                        <div class="level-progress-bar" id="level-progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Redemption Options Section -->
+            <div class="rewards-redemption-section">
+                <h3>Redeem Rewards</h3>
+                <div class="redemption-options">
+                    <div class="redemption-option" data-amount="5.00">
+                        <div class="redemption-icon"><i class="fas fa-gift"></i></div>
+                        <h4>$5 Gift Card</h4>
+                        <p>Redeem for a digital gift card</p>
+                        <button class="redeem-button" data-option="gift-card-5">Redeem $5.00</button>
+                    </div>
+                    <div class="redemption-option" data-amount="10.00">
+                        <div class="redemption-icon"><i class="fas fa-donate"></i></div>
+                        <h4>$10 Charity</h4>
+                        <p>Donate to featured charity</p>
+                        <button class="redeem-button" data-option="charity-10">Donate $10.00</button>
+                    </div>
+                    <div class="redemption-option" data-amount="15.00">
+                        <div class="redemption-icon"><i class="fas fa-star"></i></div>
+                        <h4>Premium Week</h4>
+                        <p>1 week of premium features</p>
+                        <button class="redeem-button" data-option="premium-week">Redeem $15.00</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rewards-history-container">
+                <h3>Transaction History</h3>
+                <div class="rewards-history-table-container">
+                    <table class="rewards-history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Task</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rewards-history-tbody">
+                            <!-- Rewards history entries will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="rewards-history-empty" class="rewards-history-empty">
+                    <i class="fas fa-coin fa-2x"></i>
+                    <p>No rewards history available yet. Complete tasks to earn rewards!</p>
+                </div>
+            </div>
+            
+            <!-- Leaderboard Section -->
+            <div class="rewards-leaderboard-section">
+                <h3>Top Earners Leaderboard</h3>
+                <div class="leaderboard-container" id="leaderboard-container">
+                    <div class="leaderboard-loading" id="leaderboard-loading">
+                        <p><i class="fas fa-spinner fa-spin"></i> Loading leaderboard...</p>
+                    </div>
+                    <table class="leaderboard-table" id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>User</th>
+                                <th>Level</th>
+                                <th>Rewards</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody">
+                            <!-- Leaderboard entries will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+      <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="auth.js"></script>
+    <script src="test_auto_login.js"></script>
+    <script src="location-tracker.js"></script>
+    <script src="rewards-system.js"></script>
+    <script src="dashboard-location.js"></script>
+    <script src="task-location.js"></script>
+    <script src="app_fixed.js"></script>
+    <script src="task_create.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
